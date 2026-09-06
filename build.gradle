@@ -14,7 +14,7 @@ repositories {
 }
 
 def runeLiteVersion = 'latest.release'
-def pluginMainClass = 'com.zeahrchelper.ZeahRcHelperPluginTest'
+def pluginMainClass = 'com.vetle.arceuusrc.ArceuusRcHelperPluginTest'
 
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
@@ -27,7 +27,7 @@ dependencies {
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
 
-group = 'com.zeahrchelper'
+group = 'com.vetle.arceuusrc'
 version = '1.0.4' // Keep Changelog.VERSION
 
 tasks.withType(JavaCompile).configureEach {
