@@ -16,3 +16,13 @@ RuneLite plugin, Java 11, Gradle. Hard fork of JamsRepos/zeah-rc-helper, kept Pl
 - **Prohibited:** injecting game input or automating play, even for testing; anything in the feature restrictions of `docs/RUNELITE-RULES.md`; committing credentials (`credentials.properties`).
 - **Guarded (ask first):** renaming a config key or group, adding a runtime dependency, changing `runelite-plugin.properties`, force-pushing, retagging a release.
 - **Allowed:** everything else in the loop above, including opening PRs and merging them once CI is green.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub issues on `VetleNeumann/arceuus-rc-helper` (enabled 2026-09-06). See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` at the root plus `docs/adr/`.

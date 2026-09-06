@@ -127,6 +127,28 @@ Where the Path is drawn: floor, minimap, both, or nowhere.
 The on-screen panel showing the current Step, item counts, Trips, and active Reminders.
 _Avoid_: overlay panel, HUD
 
+### Camera
+
+**Camera Pose**:
+The player's yaw, pitch and zoom, set once before a Rotation and left alone. The camera's world position follows the player, so the Pose is what stays fixed.
+_Avoid_: camera settings, camera angle, camera position
+
+**Sightline**:
+The verdict for one Next Action target seen from one tile under one Camera Pose: Clear (clickable as is), Obstructed (partly covered, still clickable) or Hidden (the player must move the camera to click it).
+_Avoid_: visibility, on-screen, coverage
+
+**Hop**:
+One click on a scene object in the Rotation, judged from the Landing Tile of the click before it. Walks to a ground tile are not Hops: the minimap always offers them. A Hop with alternative targets (the two Dense Runestones) takes the best target's Sightline.
+_Avoid_: transition, leg, click (bare)
+
+**Landing Tile**:
+The tile the player stands on once a Hop's click has resolved. One fixed tile per Hop, measured in game.
+_Avoid_: end tile, arrival tile, next position
+
+**Camera Check**:
+The setup view: every Hop's Sightline listed on the Status Panel with its cause, and the target's predicted place on screen drawn, so the player can adjust the Camera Pose before a Rotation. Off during play, when only a one-line summary shows.
+_Avoid_: camera mode, setup mode, calibration
+
 ### Reading the game
 
 **Observation**:
