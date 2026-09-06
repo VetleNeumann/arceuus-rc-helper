@@ -82,6 +82,15 @@ public class RcPathRouter
 		{
 			path = waypointApproachPath(worldView, start, end, ArceuusRcArea.BLOOD_APPROACH);
 		}
+		else if (useDarkApproach(step, start, mode))
+		{
+			path = waypointApproachPath(
+				worldView,
+				start,
+				end,
+				List.of(ArceuusRcArea.DARK_APPROACH),
+				transports(agility, step, start, mode, atMine));
+		}
 		else
 		{
 			path = Pathfinder.find(worldView, start, end, transports(agility, step, start, mode, atMine));
@@ -179,6 +188,24 @@ public class RcPathRouter
 		return start.getX() <= 1745;
 	}
 
+	/**
+	 * Blood Trips reach the Dark Altar via {@link ArceuusRcArea#DARK_APPROACH} so the scene
+	 * rebuild fires there and keeps the Blood Altar loaded for Far Bind. Off once the player is
+	 * within four tiles of the approach tile, which includes standing at the Dark Altar.
+	 */
+	static boolean useDarkApproach(RotationStep step, WorldPoint start, RcMode mode)
+	{
+		if (step != RotationStep.GO_DARK_FIRST && step != RotationStep.GO_DARK_SECOND)
+		{
+			return false;
+		}
+		if (mode != RcMode.BLOOD || start == null)
+		{
+			return false;
+		}
+		return start.distanceTo(ArceuusRcArea.DARK_APPROACH) > 4;
+	}
+
 	private TileObject objectForHop(AgilityShortcut.Hop hop)
 	{
 		int id = AgilityShortcut.objectIdForHop(hop.getFrom(), hop.getTo());
@@ -236,13 +263,23 @@ public class RcPathRouter
 		WorldPoint end,
 		List<WorldPoint> waypoints)
 	{
+		return waypointApproachPath(worldView, start, end, waypoints, Collections.emptyList());
+	}
+
+	private List<WorldPoint> waypointApproachPath(
+		WorldView worldView,
+		WorldPoint start,
+		WorldPoint end,
+		List<WorldPoint> waypoints,
+		List<Pathfinder.Transport> transports)
+	{
 		int from = firstRemainingWaypoint(start, waypoints);
 		List<WorldPoint> path = new ArrayList<>();
 		WorldPoint cursor = start;
 		for (int i = from; i < waypoints.size(); i++)
 		{
 			WorldPoint waypoint = waypoints.get(i);
-			List<WorldPoint> leg = Pathfinder.find(worldView, cursor, waypoint, Collections.emptyList());
+			List<WorldPoint> leg = Pathfinder.find(worldView, cursor, waypoint, transports);
 			if (!leg.isEmpty())
 			{
 				appendLeg(path, leg);
@@ -263,7 +300,7 @@ public class RcPathRouter
 			}
 		}
 
-		List<WorldPoint> finish = Pathfinder.find(worldView, cursor, end, Collections.emptyList());
+		List<WorldPoint> finish = Pathfinder.find(worldView, cursor, end, transports);
 		if (!finish.isEmpty())
 		{
 			appendLeg(path, finish);

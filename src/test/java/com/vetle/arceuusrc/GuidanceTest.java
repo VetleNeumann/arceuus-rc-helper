@@ -2,6 +2,8 @@ package com.vetle.arceuusrc;
 
 import java.util.Collections;
 import java.util.List;
+import net.runelite.api.coords.WorldPoint;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -83,12 +85,34 @@ public class GuidanceTest
 	}
 
 	@Test
+	public void farBindFollowsItsToggleAndTheHelper()
+	{
+		List<WorldPoint> area = List.of(ArceuusRcArea.DARK_APPROACH);
+		Guidance shown = Guidance.decide(config, mining(), List.of(), FarBind.State.STEP_IN, area);
+		assertEquals(FarBind.State.STEP_IN, shown.getFarBind());
+		assertEquals(area, shown.getFarBindArea());
+
+		config.showFarBind = false;
+		Guidance toggledOff = Guidance.decide(config, mining(), List.of(), FarBind.State.STEP_IN, area);
+		assertEquals(FarBind.State.NONE, toggledOff.getFarBind());
+		assertTrue(toggledOff.getFarBindArea().isEmpty());
+
+		config.showFarBind = true;
+		config.enableHelper = false;
+		Guidance helperOff = Guidance.decide(config, mining(), List.of(), FarBind.State.READY, area);
+		assertEquals(FarBind.State.NONE, helperOff.getFarBind());
+		assertTrue(helperOff.getFarBindArea().isEmpty());
+	}
+
+	@Test
 	public void noneShowsNothing()
 	{
 		Guidance g = Guidance.none();
 		assertFalse(g.isDrawFloorPath() || g.isDrawMinimapPath() || g.isHighlightClick()
 			|| g.isShowPanel() || g.isIdleTint());
 		assertTrue(g.getReminders().isEmpty());
+		assertEquals(FarBind.State.NONE, g.getFarBind());
+		assertTrue(g.getFarBindArea().isEmpty());
 	}
 
 	private static NextAction mining()
@@ -103,6 +127,13 @@ public class GuidanceTest
 		PathDisplay pathDisplay = PathDisplay.FLOOR_AND_MINIMAP;
 		boolean showStatusPanel = true;
 		boolean idleFlash = false;
+		boolean showFarBind = true;
+
+		@Override
+		public boolean showFarBind()
+		{
+			return showFarBind;
+		}
 
 		@Override
 		public boolean enableHelper()

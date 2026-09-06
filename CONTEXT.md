@@ -90,6 +90,14 @@ _Avoid_: hop, obstacle, jump
 **At Altar** / **Near Altar**:
 Two distances from the crafting altar that gate Steps: At Altar means close enough to craft; Near Altar means close enough that the player is committed to the altar visit.
 
+**Far Bind**:
+Clicking the Blood Altar from a distance so the character walks there on its own. Holds only when the altar sits inside the loaded scene and the player stands within the client's reach of it; neither alone is enough.
+_Avoid_: clickable from afar, altar loaded, always in scene, in scene
+
+**Far Bind Area**:
+The tiles from which Far Bind holds, drawn when the player is close to it but still outside.
+_Avoid_: zone, range, clickable area
+
 ### Guidance
 
 **Helper**:

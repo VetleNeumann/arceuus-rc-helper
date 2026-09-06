@@ -17,6 +17,15 @@ public final class ArceuusRcArea
 	public static final WorldPoint MINE_STAND = new WorldPoint(1762, 3854, 0);
 	public static final WorldPoint DARK_ALTAR = new WorldPoint(1718, 3882, 0);
 	public static final WorldPoint BLOOD_ALTAR = new WorldPoint(1717, 3829, 0);
+	/** South-west tile of the Blood Altar object's 4x4 footprint, read from the scene in game. */
+	public static final WorldPoint BLOOD_ALTAR_FOOTPRINT_SW = new WorldPoint(1716, 3829, 0);
+	public static final int BLOOD_ALTAR_FOOTPRINT_SIZE = 4;
+	/**
+	 * Where to reach before touching the Dark Altar on a Blood Trip: four tiles south of it. The
+	 * scene rebuild then fires here and keeps the Blood Altar loaded for Far Bind. Also the
+	 * nearest tile to the Dark Altar from which Far Bind holds.
+	 */
+	public static final WorldPoint DARK_APPROACH = new WorldPoint(1718, 3878, 0);
 	public static final WorldPoint SOUL_ALTAR = new WorldPoint(1815, 3854, 0);
 	/** 73 Agility rock scramble (west, blood altar → mine, one-way). */
 	public static final WorldPoint SHORTCUT = new WorldPoint(1743, 3854, 0);

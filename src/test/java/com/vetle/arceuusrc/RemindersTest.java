@@ -168,7 +168,7 @@ public class RemindersTest
 	public void outsideArceuusNothingAppliesButChargesAreKept()
 	{
 		reminders.onChatMessage(chat("Your blood essence has 500 charges remaining"));
-		Observation away = new Observation(false, RcMode.BLOOD, Position.UNKNOWN, InventorySnapshot.empty(), 99, false, true, 0, null);
+		Observation away = new Observation(false, RcMode.BLOOD, Position.UNKNOWN, InventorySnapshot.empty(), 99, false, true, 0, false, null);
 		assertEquals(List.of(), reminders.evaluate(away, T0));
 		assertEquals(Integer.valueOf(500), reminders.bloodEssenceCharges());
 	}
@@ -176,7 +176,7 @@ public class RemindersTest
 	@Test
 	public void leavingArceuusRestartsTheIdleTimer()
 	{
-		Observation away = new Observation(false, RcMode.BLOOD, Position.UNKNOWN, InventorySnapshot.empty(), 99, false, true, 0, null);
+		Observation away = new Observation(false, RcMode.BLOOD, Position.UNKNOWN, InventorySnapshot.empty(), 99, false, true, 0, false, null);
 		reminders.evaluate(obs(ready(), RcMode.BLOOD, TILE, false, true), T0);
 		reminders.evaluate(away, T0.plusSeconds(10));
 		reminders.evaluate(obs(ready(), RcMode.BLOOD, TILE, false, true), T0.plusSeconds(20));
@@ -210,7 +210,7 @@ public class RemindersTest
 
 	private static Observation obs(InventorySnapshot inv, RcMode rune, WorldPoint tile, boolean animating, boolean idlePose)
 	{
-		return new Observation(true, rune, new Position(tile, true, false, false), inv, 99, animating, idlePose, 0, null);
+		return new Observation(true, rune, new Position(tile, true, false, false), inv, 99, animating, idlePose, 0, false, null);
 	}
 
 	private static List<String> texts(List<Reminder> list)

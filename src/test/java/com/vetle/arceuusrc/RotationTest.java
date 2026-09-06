@@ -178,7 +178,7 @@ public class RotationTest
 
 	private RotationStep step(InventorySnapshot inv, Position position)
 	{
-		return rotation.advance(new Observation(true, RcMode.BLOOD, position, inv, 99, false, true, 0, null));
+		return rotation.advance(new Observation(true, RcMode.BLOOD, position, inv, 99, false, true, 0, false, null));
 	}
 
 	/** Fragments are one stackable slot; blocks take one slot each. */

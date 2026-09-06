@@ -40,6 +40,10 @@ public class Helper
 
 	private List<Reminder> activeReminders = List.of();
 
+	/** Far Bind as of the last tick, before the config decides whether it is shown. */
+	private FarBind.State farBind = FarBind.State.NONE;
+	private List<WorldPoint> farBindArea = List.of();
+
 	@Inject
 	Helper(
 		ArceuusRcHelperConfig config,
@@ -86,6 +90,7 @@ public class Helper
 			if (config.enableHelper())
 			{
 				currentAction = nextAction(obs, step);
+				updateFarBind(step, obs);
 			}
 			else
 			{
@@ -96,7 +101,7 @@ public class Helper
 		{
 			clearAction();
 		}
-		guidance = Guidance.decide(config, currentAction, activeReminders);
+		guidance = Guidance.decide(config, currentAction, activeReminders, farBind, farBindArea);
 	}
 
 	private NextAction nextAction(Observation obs, RotationStep step)
@@ -117,6 +122,13 @@ public class Helper
 			click.getObject(),
 			click.getTile(),
 			color);
+	}
+
+	private void updateFarBind(RotationStep step, Observation obs)
+	{
+		WorldPoint tile = obs.getPosition().getTile();
+		farBind = FarBind.evaluate(step, resolvedMode, tile, obs.isBloodAltarInScene());
+		farBindArea = farBind == FarBind.State.STEP_IN ? FarBind.area(tile) : List.of();
 	}
 
 	/**
@@ -143,6 +155,8 @@ public class Helper
 	private void clearAction()
 	{
 		currentAction = NextAction.idle();
+		farBind = FarBind.State.NONE;
+		farBindArea = List.of();
 		pathRouter.reset();
 		shortestPathBridge.clear();
 	}
@@ -216,7 +230,8 @@ public class Helper
 				return ArceuusRcArea.MINE_STAND;
 			case GO_DARK_FIRST:
 			case GO_DARK_SECOND:
-				return ArceuusRcArea.DARK_ALTAR;
+				// Blood Trips stop four tiles south first so the Blood Altar stays loaded (Far Bind).
+				return resolvedMode == RcMode.BLOOD ? ArceuusRcArea.DARK_APPROACH : ArceuusRcArea.DARK_ALTAR;
 			case GO_ALTAR:
 			case CRAFT_FRAGMENTS:
 			case CRAFT_REMAINING:

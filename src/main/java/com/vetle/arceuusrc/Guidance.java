@@ -2,6 +2,7 @@ package com.vetle.arceuusrc;
 
 import java.util.List;
 import lombok.Value;
+import net.runelite.api.coords.WorldPoint;
 
 /**
  * What the Helper decided to show this tick: the Next Action, the active Reminders, and which of
@@ -12,7 +13,7 @@ import lombok.Value;
 public class Guidance
 {
 	private static final Guidance NONE =
-		new Guidance(NextAction.idle(), List.of(), false, false, false, false, false);
+		new Guidance(NextAction.idle(), List.of(), false, false, false, false, false, FarBind.State.NONE, List.of());
 
 	NextAction nextAction;
 	/** Reminders that apply, in display order. */
@@ -22,6 +23,10 @@ public class Guidance
 	boolean highlightClick;
 	boolean showPanel;
 	boolean idleTint;
+	/** Far Bind row on the Status Panel; NONE when hidden by config or not applicable. */
+	FarBind.State farBind;
+	/** Far Bind Area tiles to draw; empty unless the state is STEP_IN and the row is shown. */
+	List<WorldPoint> farBindArea;
 
 	/** Nothing shown: before the first tick and after reset. */
 	public static Guidance none()
@@ -31,8 +36,19 @@ public class Guidance
 
 	public static Guidance decide(ArceuusRcHelperConfig config, NextAction nextAction, List<Reminder> reminders)
 	{
+		return decide(config, nextAction, reminders, FarBind.State.NONE, List.of());
+	}
+
+	public static Guidance decide(
+		ArceuusRcHelperConfig config,
+		NextAction nextAction,
+		List<Reminder> reminders,
+		FarBind.State farBind,
+		List<WorldPoint> farBindArea)
+	{
 		boolean helperOn = config.enableHelper();
 		boolean inRotation = helperOn && nextAction.getStep() != RotationStep.IDLE;
+		boolean showFarBind = helperOn && config.showFarBind();
 		return new Guidance(
 			nextAction,
 			reminders,
@@ -40,7 +56,9 @@ public class Guidance
 			helperOn && config.pathDisplay().showsMinimap(),
 			helperOn && config.highlightNextClick(),
 			config.showStatusPanel() && (inRotation || !reminders.isEmpty()),
-			config.idleFlash() && hasIdle(reminders));
+			config.idleFlash() && hasIdle(reminders),
+			showFarBind ? farBind : FarBind.State.NONE,
+			showFarBind ? farBindArea : List.of());
 	}
 
 	private static boolean hasIdle(List<Reminder> reminders)

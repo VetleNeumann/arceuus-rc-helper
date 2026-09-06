@@ -67,6 +67,7 @@ public class ClientObserver
 			animating,
 			idlePose,
 			client.getTickCount(),
+			sceneTracker.isBloodAltarInScene(),
 			client.getTopLevelWorldView());
 	}
 }

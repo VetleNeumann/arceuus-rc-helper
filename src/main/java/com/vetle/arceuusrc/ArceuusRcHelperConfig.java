@@ -100,6 +100,19 @@ public interface ArceuusRcHelperConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "showFarBind",
+		name = "Far Bind",
+		description = "Bloods only: say when the Blood Altar can be clicked from where you stand, "
+			+ "and mark the tiles to step to when you are just outside that range",
+		section = helperSection,
+		position = 6
+	)
+	default boolean showFarBind()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "gearReminder",
 		name = "Gear reminders",
 		description = "Remind you to bring a chisel (including jeweller's), a pickaxe, and an abyssal lantern",
