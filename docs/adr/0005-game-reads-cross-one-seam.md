@@ -6,7 +6,7 @@ Now `ClientObserver` in the `game` package reads the client once per tick into a
 
 ## Consequences
 
-- A `net.runelite.api.Client` import in the root package is a review failure. A checkstyle rule will enforce it once the seam has settled.
+- A `net.runelite.api.Client` import in the root package fails the build: checkstyle's `ImportControl` (`config/checkstyle/import-control.xml`) allows it only under `game` and `overlay`.
 - Tests for logic modules construct an `Observation` by hand; there is no Mockito on RuneLite types outside the `game` package.
 - Scene-object tracking and varbit reads stay in `SceneTracker`; they are scene state, not per-tick player state, and are queried with a `WorldPoint` argument rather than reading the player themselves.
 - `WorldView` rides along inside the Observation because pathfinding needs the collision map. It is the only non-value field and only `RcPathRouter` reads it.

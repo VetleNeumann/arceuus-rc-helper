@@ -9,6 +9,7 @@ What `./gradlew build` cannot check. Style itself is enforced by `config/checkst
 - Name things with the vocabulary in `CONTEXT.md`. A name that needs the glossary changed goes with a glossary edit in the same PR.
 - `log.debug` for diagnostics. `log.info` only for one-off lifecycle messages: RuneLite ships at INFO and per-tick info lines pollute every user's log.
 - Anything the Plugin Hub restricts is in `docs/RUNELITE-RULES.md`; checkstyle covers the mechanical subset.
+- The RuneLite `Client` is read in the `game` package and drawn from in `overlay`; logic in the root package takes an `Observation` value (ADR-0005). Checkstyle rejects a `Client` import anywhere else.
 
 ## Tests
 
