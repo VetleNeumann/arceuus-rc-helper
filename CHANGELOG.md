@@ -62,6 +62,6 @@ All notable changes to this plugin. Format: [Keep a Changelog](https://keepachan
 
 - Initial release: pathfinding with agility shortcuts, scene tracking, runestone highlights, rotation guidance, gear and idle reminders.
 
-[Unreleased]: https://github.com/VetleNeumann/zeah-rc-helper/compare/v1.0.1...HEAD
-[1.0.1]: https://github.com/VetleNeumann/zeah-rc-helper/compare/v1.0.0...v1.0.1
-[1.0.0]: https://github.com/VetleNeumann/zeah-rc-helper/releases/tag/v1.0.0
+[Unreleased]: https://github.com/VetleNeumann/arceuus-rc-helper/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/VetleNeumann/arceuus-rc-helper/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/VetleNeumann/arceuus-rc-helper/releases/tag/v1.0.0

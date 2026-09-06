@@ -1,6 +1,6 @@
 # Arceuus RC Helper
 
-[![CI](https://github.com/VetleNeumann/zeah-rc-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/VetleNeumann/zeah-rc-helper/actions/workflows/ci.yml)
+[![CI](https://github.com/VetleNeumann/arceuus-rc-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/VetleNeumann/arceuus-rc-helper/actions/workflows/ci.yml)
 
 A click-here helper for Arceuus blood and soul runecrafting. It highlights what to click next, draws a path there, and keeps your inventory counts and gear reminders in one small panel.
 
