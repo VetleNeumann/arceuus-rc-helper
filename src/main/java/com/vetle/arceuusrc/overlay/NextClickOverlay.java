@@ -2,7 +2,7 @@ package com.vetle.arceuusrc.overlay;
 
 import com.vetle.arceuusrc.AgilityShortcut;
 import com.vetle.arceuusrc.HelperAction;
-import com.vetle.arceuusrc.RotationHelper;
+import com.vetle.arceuusrc.Helper;
 import com.vetle.arceuusrc.ArceuusRcHelperConfig;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -36,16 +36,16 @@ public class NextClickOverlay extends Overlay
 
 	private final Client client;
 	private final ArceuusRcHelperConfig config;
-	private final RotationHelper rotationHelper;
+	private final Helper helper;
 
 	@Inject
-	private NextClickOverlay(Client client, ArceuusRcHelperConfig config, RotationHelper rotationHelper)
+	private NextClickOverlay(Client client, ArceuusRcHelperConfig config, Helper helper)
 	{
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_SCENE);
 		this.client = client;
 		this.config = config;
-		this.rotationHelper = rotationHelper;
+		this.helper = helper;
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class NextClickOverlay extends Overlay
 			return null;
 		}
 
-		HelperAction action = rotationHelper.getCurrentAction();
+		HelperAction action = helper.getCurrentAction();
 		if (action == null)
 		{
 			return null;

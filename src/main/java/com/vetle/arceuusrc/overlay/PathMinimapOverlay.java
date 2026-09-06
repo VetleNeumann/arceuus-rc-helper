@@ -2,7 +2,7 @@ package com.vetle.arceuusrc.overlay;
 
 import com.vetle.arceuusrc.AgilityShortcut;
 import com.vetle.arceuusrc.HelperAction;
-import com.vetle.arceuusrc.RotationHelper;
+import com.vetle.arceuusrc.Helper;
 import com.vetle.arceuusrc.ArceuusRcHelperConfig;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -32,17 +32,17 @@ public class PathMinimapOverlay extends Overlay
 
 	private final Client client;
 	private final ArceuusRcHelperConfig config;
-	private final RotationHelper rotationHelper;
+	private final Helper helper;
 
 	@Inject
-	private PathMinimapOverlay(Client client, ArceuusRcHelperConfig config, RotationHelper rotationHelper)
+	private PathMinimapOverlay(Client client, ArceuusRcHelperConfig config, Helper helper)
 	{
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
 		setPriority(Overlay.PRIORITY_LOW);
 		this.client = client;
 		this.config = config;
-		this.rotationHelper = rotationHelper;
+		this.helper = helper;
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class PathMinimapOverlay extends Overlay
 			return null;
 		}
 
-		HelperAction action = rotationHelper.getCurrentAction();
+		HelperAction action = helper.getCurrentAction();
 		if (action == null || action.getPath() == null || action.getPath().size() < 2)
 		{
 			return null;

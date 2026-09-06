@@ -11,17 +11,21 @@ import lombok.Getter;
 import net.runelite.api.TileObject;
 import net.runelite.api.coords.WorldPoint;
 
+/**
+ * The guidance layer. Each tick it feeds the Observation through the Rotation, asks the path
+ * router for the Path and assembles the Next Action the overlays draw. Switching the Helper off
+ * suppresses the Next Action only; the Rotation keeps advancing and Reminders keep running.
+ */
 @Singleton
-public class RotationHelper
+public class Helper
 {
-	private static final int FULL_FRAGMENTS = 100;
-
 	private final ArceuusRcHelperConfig config;
 	private final InventoryChecker inventoryChecker;
 	private final ReminderService reminderService;
 	private final SceneTracker sceneTracker;
 	private final RcPathRouter pathRouter;
 	private final ShortestPathBridge shortestPathBridge;
+	private final Rotation rotation = new Rotation();
 
 	@Getter
 	private HelperAction currentAction = HelperAction.idle();
@@ -32,13 +36,8 @@ public class RotationHelper
 	@Getter
 	private RcMode resolvedMode = RcMode.BLOOD;
 
-	@Getter
-	private int tripsCompleted;
-
-	private RotationStep lastStep = RotationStep.IDLE;
-
 	@Inject
-	RotationHelper(
+	Helper(
 		ArceuusRcHelperConfig config,
 		InventoryChecker inventoryChecker,
 		ReminderService reminderService,
@@ -54,11 +53,15 @@ public class RotationHelper
 		this.shortestPathBridge = shortestPathBridge;
 	}
 
+	public int getTripsCompleted()
+	{
+		return rotation.tripsCompleted();
+	}
+
 	public void reset()
 	{
 		currentAction = HelperAction.idle();
-		tripsCompleted = 0;
-		lastStep = RotationStep.IDLE;
+		rotation.reset();
 		pathRouter.reset();
 		shortestPathBridge.clear();
 		inventoryChecker.reset();
@@ -68,9 +71,7 @@ public class RotationHelper
 	{
 		if (!obs.isInArceuus())
 		{
-			currentAction = HelperAction.idle();
-			pathRouter.reset();
-			shortestPathBridge.clear();
+			clearAction();
 			reminderService.update(obs);
 			return;
 		}
@@ -78,21 +79,13 @@ public class RotationHelper
 		resolvedMode = obs.getRune();
 		snapshot = obs.getInventory();
 		reminderService.update(obs);
+		RotationStep step = rotation.advance(obs);
 
 		if (!config.enableHelper())
 		{
-			currentAction = HelperAction.idle();
-			pathRouter.reset();
-			shortestPathBridge.clear();
+			clearAction();
 			return;
 		}
-
-		RotationStep step = inferStep(obs);
-		if (isTripCompleteTransition(lastStep, step))
-		{
-			tripsCompleted++;
-		}
-		lastStep = step;
 
 		Position position = obs.getPosition();
 		WorldPoint start = position.getTile();
@@ -114,11 +107,18 @@ public class RotationHelper
 		shortestPathBridge.update(start, shortestPathTarget(end, step), color, obs.getTick());
 		currentAction = new HelperAction(
 			step,
-			detailFor(step, snapshot),
+			step.detail(resolvedMode),
 			path,
 			click.getObject(),
 			click.getTile(),
 			color);
+	}
+
+	private void clearAction()
+	{
+		currentAction = HelperAction.idle();
+		pathRouter.reset();
+		shortestPathBridge.clear();
 	}
 
 	/**
@@ -145,7 +145,7 @@ public class RotationHelper
 			case CRAFT_FRAGMENTS:
 			case CRAFT_REMAINING:
 			case CHISEL_AT_ALTAR:
-				return resolvedMode == RcMode.SOUL ? ArceuusRcArea.SOUL_ALTAR : ArceuusRcArea.BLOOD_ALTAR;
+				return craftAltar();
 			default:
 				return end;
 		}
@@ -210,10 +210,15 @@ public class RotationHelper
 			case CRAFT_FRAGMENTS:
 			case CRAFT_REMAINING:
 			case CHISEL_AT_ALTAR:
-				return resolvedMode == RcMode.SOUL ? ArceuusRcArea.SOUL_ALTAR : ArceuusRcArea.BLOOD_ALTAR;
+				return craftAltar();
 			default:
 				return null;
 		}
+	}
+
+	private WorldPoint craftAltar()
+	{
+		return resolvedMode == RcMode.SOUL ? ArceuusRcArea.SOUL_ALTAR : ArceuusRcArea.BLOOD_ALTAR;
 	}
 
 	private Color colorFor(RotationStep step)
@@ -226,91 +231,6 @@ public class RotationHelper
 				return resolvedMode.getColor();
 			default:
 				return step.getColor();
-		}
-	}
-
-	private RotationStep inferStep(Observation obs)
-	{
-		InventorySnapshot inv = obs.getInventory();
-		Position position = obs.getPosition();
-		boolean atAltar = position.isAtAltar();
-		boolean nearAltar = position.isNearAltar();
-		boolean atMine = position.isAtMine();
-		boolean hasFrags = inv.getFragments() > 0;
-		boolean hasDark = inv.getDarkBlocks() > 0;
-		boolean hasDense = inv.getDenseBlocks() > 0;
-		boolean inventoryFull = inv.getEmptySlots() == 0;
-		boolean fullFragmentStack = inv.getFragments() >= FULL_FRAGMENTS;
-
-		if (atAltar)
-		{
-			if (hasFrags)
-			{
-				return RotationStep.CRAFT_FRAGMENTS;
-			}
-			if (hasDark)
-			{
-				return RotationStep.CHISEL_AT_ALTAR;
-			}
-			return RotationStep.RETURN_TO_MINE;
-		}
-
-		if (hasFrags && hasDark && (inventoryFull || fullFragmentStack || nearAltar))
-		{
-			return RotationStep.GO_ALTAR;
-		}
-		if (hasDense && inventoryFull)
-		{
-			return fullFragmentStack || hasFrags ? RotationStep.GO_DARK_SECOND : RotationStep.GO_DARK_FIRST;
-		}
-		if (hasDark && !fullFragmentStack)
-		{
-			return RotationStep.CHISEL_AND_RETURN;
-		}
-		if (hasFrags && !hasDark && !hasDense)
-		{
-			return atMine ? RotationStep.MINE_SECOND : RotationStep.RETURN_TO_MINE;
-		}
-		if (!atMine && hasDense && !fullFragmentStack)
-		{
-			return RotationStep.GO_DARK_FIRST;
-		}
-		return RotationStep.MINE_FIRST;
-	}
-
-	private static boolean isTripCompleteTransition(RotationStep from, RotationStep to)
-	{
-		return (from == RotationStep.CRAFT_REMAINING || from == RotationStep.RETURN_TO_MINE)
-			&& to == RotationStep.MINE_FIRST;
-	}
-
-	private String detailFor(RotationStep step, InventorySnapshot inv)
-	{
-		String rune = resolvedMode == RcMode.SOUL ? "soul" : "blood";
-		switch (step)
-		{
-			case MINE_FIRST:
-				return "Fill your first inventory";
-			case GO_DARK_FIRST:
-				return "Click the Dark Altar to venerate all dense blocks";
-			case CHISEL_AND_RETURN:
-				return "Use chisel on dark blocks while running back to the mine";
-			case MINE_SECOND:
-				return "Fill your second inventory";
-			case GO_DARK_SECOND:
-				return "Venerate the second inventory at the Dark Altar";
-			case GO_ALTAR:
-				return "Carry fragments + dark blocks to the " + rune + " altar";
-			case CRAFT_FRAGMENTS:
-				return "Click the " + rune + " altar to craft your fragments";
-			case CHISEL_AT_ALTAR:
-				return "Chisel the remaining dark blocks into fragments";
-			case CRAFT_REMAINING:
-				return "Click the " + rune + " altar again for the second batch";
-			case RETURN_TO_MINE:
-				return "Take the shortcut back to the dense essence mine";
-			default:
-				return step.getLabel();
 		}
 	}
 }

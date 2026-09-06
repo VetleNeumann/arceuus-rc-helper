@@ -4,7 +4,7 @@ import com.vetle.arceuusrc.HelperAction;
 import com.vetle.arceuusrc.InventorySnapshot;
 import com.vetle.arceuusrc.RcMode;
 import com.vetle.arceuusrc.ReminderService;
-import com.vetle.arceuusrc.RotationHelper;
+import com.vetle.arceuusrc.Helper;
 import com.vetle.arceuusrc.RotationStep;
 import com.vetle.arceuusrc.ArceuusRcHelperConfig;
 import com.vetle.arceuusrc.ArceuusRcHelperPlugin;
@@ -30,20 +30,20 @@ public class StatusOverlay extends OverlayPanel
 	private static final Dimension SIZE = new Dimension(156, 0);
 
 	private final ArceuusRcHelperConfig config;
-	private final RotationHelper rotationHelper;
+	private final Helper helper;
 	private final ReminderService reminderService;
 
 	@Inject
 	private StatusOverlay(
 		ArceuusRcHelperPlugin plugin,
 		ArceuusRcHelperConfig config,
-		RotationHelper rotationHelper,
+		Helper helper,
 		ReminderService reminderService)
 	{
 		super(plugin);
 		setPosition(OverlayPosition.TOP_LEFT);
 		this.config = config;
-		this.rotationHelper = rotationHelper;
+		this.helper = helper;
 		this.reminderService = reminderService;
 		panelComponent.setBorder(new Rectangle(8, 8, 8, 8));
 		panelComponent.setGap(new Point(0, 4));
@@ -59,7 +59,7 @@ public class StatusOverlay extends OverlayPanel
 			return null;
 		}
 
-		HelperAction action = rotationHelper.getCurrentAction();
+		HelperAction action = helper.getCurrentAction();
 		boolean inRotation = config.enableHelper()
 			&& action != null
 			&& action.getStep() != RotationStep.IDLE;
@@ -69,8 +69,8 @@ public class StatusOverlay extends OverlayPanel
 			return null;
 		}
 
-		RcMode mode = rotationHelper.getResolvedMode();
-		InventorySnapshot inv = rotationHelper.getSnapshot();
+		RcMode mode = helper.getResolvedMode();
+		InventorySnapshot inv = helper.getSnapshot();
 
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left(mode == RcMode.SOUL ? "Souls" : "Bloods")
@@ -88,7 +88,7 @@ public class StatusOverlay extends OverlayPanel
 			panelComponent.getChildren().add(line("Dense", String.valueOf(inv.getDenseBlocks()), LABEL));
 			panelComponent.getChildren().add(line("Dark", String.valueOf(inv.getDarkBlocks()), LABEL));
 			panelComponent.getChildren().add(line("Fragments", String.valueOf(inv.getFragments()), LABEL));
-			panelComponent.getChildren().add(line("Trips", String.valueOf(rotationHelper.getTripsCompleted()), LABEL));
+			panelComponent.getChildren().add(line("Trips", String.valueOf(helper.getTripsCompleted()), LABEL));
 
 			if (mode == RcMode.BLOOD)
 			{
