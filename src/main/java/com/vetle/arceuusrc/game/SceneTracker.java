@@ -1,5 +1,8 @@
-package com.vetle.arceuusrc;
+package com.vetle.arceuusrc.game;
 
+import com.vetle.arceuusrc.AgilityShortcut;
+import com.vetle.arceuusrc.ArceuusRcArea;
+import com.vetle.arceuusrc.RcMode;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Getter;
@@ -51,7 +54,7 @@ public class SceneTracker
 	private TileObject shortcut49;
 
 	@Inject
-	SceneTracker(Client client)
+	public SceneTracker(Client client)
 	{
 		this.client = client;
 	}
@@ -255,7 +258,7 @@ public class SceneTracker
 			|| loc.distanceTo(ArceuusRcArea.RUNESTONE_NORTH) <= 10;
 	}
 
-	static int distanceTo(TileObject object, WorldPoint loc)
+	public static int distanceTo(TileObject object, WorldPoint loc)
 	{
 		if (object == null || loc == null)
 		{

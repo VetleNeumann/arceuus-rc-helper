@@ -1,5 +1,8 @@
-package com.vetle.arceuusrc;
+package com.vetle.arceuusrc.game;
 
+import com.vetle.arceuusrc.ArceuusRcHelperConfig;
+import com.vetle.arceuusrc.PathDisplay;
+import com.vetle.arceuusrc.PathProvider;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +25,7 @@ import net.runelite.client.plugins.PluginManager;
  */
 @Slf4j
 @Singleton
-class ShortestPathBridge
+public class ShortestPathBridge
 {
 	private static final String NAMESPACE = "shortestpath";
 	private static final String MESSAGE_PATH = "path";
@@ -51,7 +54,7 @@ class ShortestPathBridge
 	private int postedTick;
 
 	@Inject
-	ShortestPathBridge(
+	public ShortestPathBridge(
 		Client client,
 		ArceuusRcHelperConfig config,
 		EventBus eventBus,
@@ -64,12 +67,12 @@ class ShortestPathBridge
 	}
 
 	/** True when Shortest Path is picked and actually running, so it owns the path drawing. */
-	boolean isDriving()
+	public boolean isDriving()
 	{
 		return config.pathProvider() == PathProvider.SHORTEST_PATH && isShortestPathRunning();
 	}
 
-	void update(WorldPoint destination, Color color)
+	public void update(WorldPoint destination, Color color)
 	{
 		PathDisplay display = config.pathDisplay();
 		if (!isDriving() || display.isOff() || destination == null)
@@ -112,7 +115,7 @@ class ShortestPathBridge
 	}
 
 	/** Drops our path and hands Shortest Path's own colours back to the user. */
-	void clear()
+	public void clear()
 	{
 		if (postedTarget == null)
 		{
