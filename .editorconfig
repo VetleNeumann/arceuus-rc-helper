@@ -22,7 +22,7 @@ indent_style = space
 indent_size = 2
 trim_trailing_whitespace = false
 
-[*.{sh,ps1}]
+[{*.sh,*.ps1,.githooks/*}]
 indent_style = space
 indent_size = 4
 

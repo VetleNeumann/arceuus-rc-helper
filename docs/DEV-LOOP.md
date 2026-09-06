@@ -11,6 +11,14 @@ RuneLite needs a display and a GPU, and this repo is developed from WSL, so `./g
 
 The Windows folder defaults to `C:\Users\zantox\runelite-dev`; override with `RL_DEV_DIR=/mnt/c/...`. Logs land there as `dev-client.log` and `dev-client.err.log`. Enable the plugin in the client under Configuration → Arceuus RC Helper.
 
+## One-time setup (git hooks)
+
+```bash
+./gradlew installGitHooks   # sets core.hooksPath to .githooks for this clone
+```
+
+`pre-commit` runs `spotlessCheck` and refuses the commit on a formatting violation; it never rewrites files, so run `./gradlew spotlessApply`, review the diff and commit again. `pre-push` runs the full `./gradlew build`. Both are plain bash in `.githooks/`, versioned with the code; `--no-verify` bypasses them when CI is meant to see a failure.
+
 ## One-time setup (Jagex account login)
 
 The dev client cannot log in through the Jagex Launcher, so it reuses the credentials the normal client writes:
