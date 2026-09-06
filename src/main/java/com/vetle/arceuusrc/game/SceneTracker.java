@@ -11,7 +11,6 @@ import net.runelite.api.DecorativeObject;
 import net.runelite.api.GameObject;
 import net.runelite.api.GameState;
 import net.runelite.api.GroundObject;
-import net.runelite.api.Player;
 import net.runelite.api.Scene;
 import net.runelite.api.Tile;
 import net.runelite.api.TileObject;
@@ -29,6 +28,10 @@ import net.runelite.api.gameval.VarbitID;
 public class SceneTracker
 {
 	private static final int RUNESTONE_NEAR_TILES = 4;
+	/** At Altar: close enough to craft. */
+	private static final int AT_ALTAR_TILES = 12;
+	/** Near Altar: close enough that the player is committed to the altar visit. */
+	private static final int NEAR_ALTAR_TILES = 24;
 
 	private final Client client;
 
@@ -159,15 +162,14 @@ public class SceneTracker
 		return mineableFromVarbits(false);
 	}
 
-	public TileObject chooseRunestone()
+	/** The Dense Runestone to mine next; none while an animation plays, so a mining player is left alone. */
+	public TileObject chooseRunestone(WorldPoint loc, boolean animating)
 	{
-		Player player = client.getLocalPlayer();
-		if (isMining(player))
+		if (animating)
 		{
 			return null;
 		}
 
-		WorldPoint loc = player == null ? null : player.getWorldLocation();
 		boolean northDense = isNorthMineable();
 		boolean southDense = isSouthMineable();
 
@@ -187,33 +189,32 @@ public class SceneTracker
 		return null;
 	}
 
-	private static boolean isMining(Player player)
-	{
-		if (player == null)
-		{
-			return false;
-		}
-		return player.getAnimation() != -1;
-	}
-
 	public TileObject altarFor(RcMode mode)
 	{
 		return mode == RcMode.SOUL ? soulAltar : bloodAltar;
 	}
 
-	public boolean isNearAltar(RcMode mode, int tiles)
+	public boolean isAtAltar(WorldPoint loc, RcMode rune)
 	{
-		Player player = client.getLocalPlayer();
-		if (player == null)
+		return withinAltar(loc, rune, AT_ALTAR_TILES);
+	}
+
+	public boolean isNearAltar(WorldPoint loc, RcMode rune)
+	{
+		return withinAltar(loc, rune, NEAR_ALTAR_TILES);
+	}
+
+	private boolean withinAltar(WorldPoint loc, RcMode rune, int tiles)
+	{
+		if (loc == null)
 		{
 			return false;
 		}
-		WorldPoint loc = player.getWorldLocation();
-		if (distanceTo(altarFor(mode), loc) <= tiles)
+		if (distanceTo(altarFor(rune), loc) <= tiles)
 		{
 			return true;
 		}
-		WorldPoint fallback = mode == RcMode.SOUL ? ArceuusRcArea.SOUL_ALTAR : ArceuusRcArea.BLOOD_ALTAR;
+		WorldPoint fallback = rune == RcMode.SOUL ? ArceuusRcArea.SOUL_ALTAR : ArceuusRcArea.BLOOD_ALTAR;
 		return loc.distanceTo(fallback) <= tiles;
 	}
 
