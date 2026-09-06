@@ -40,7 +40,7 @@ A Dense Block after Venerate. Chiselled into Fragments.
 _Avoid_: dark essence, dark
 
 **Fragment**:
-The stackable item produced by chiselling a Dark Block. Crafted into runes at the Blood or Soul Altar.
+The stackable item produced by chiselling a Dark Block. Crafted into runes at the Blood or Soul Altar. The game hides the stack size, so the plugin estimates it.
 _Avoid_: dark essence fragments, frags, essence
 
 **Full Stack**:

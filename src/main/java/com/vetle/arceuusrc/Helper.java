@@ -1,6 +1,5 @@
 package com.vetle.arceuusrc;
 
-import com.vetle.arceuusrc.game.InventoryChecker;
 import com.vetle.arceuusrc.game.SceneTracker;
 import com.vetle.arceuusrc.game.ShortestPathBridge;
 import java.awt.Color;
@@ -21,7 +20,6 @@ import net.runelite.api.coords.WorldPoint;
 public class Helper
 {
 	private final ArceuusRcHelperConfig config;
-	private final InventoryChecker inventoryChecker;
 	private final Reminders reminders;
 	private final SceneTracker sceneTracker;
 	private final RcPathRouter pathRouter;
@@ -44,14 +42,12 @@ public class Helper
 	@Inject
 	Helper(
 		ArceuusRcHelperConfig config,
-		InventoryChecker inventoryChecker,
 		Reminders reminders,
 		SceneTracker sceneTracker,
 		RcPathRouter pathRouter,
 		ShortestPathBridge shortestPathBridge)
 	{
 		this.config = config;
-		this.inventoryChecker = inventoryChecker;
 		this.reminders = reminders;
 		this.sceneTracker = sceneTracker;
 		this.pathRouter = pathRouter;
@@ -75,7 +71,6 @@ public class Helper
 		rotation.reset();
 		pathRouter.reset();
 		shortestPathBridge.clear();
-		inventoryChecker.reset();
 	}
 
 	public void update(Observation obs)
