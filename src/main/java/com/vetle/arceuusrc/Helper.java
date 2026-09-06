@@ -4,6 +4,7 @@ import com.vetle.arceuusrc.game.InventoryChecker;
 import com.vetle.arceuusrc.game.SceneTracker;
 import com.vetle.arceuusrc.game.ShortestPathBridge;
 import java.awt.Color;
+import java.time.Instant;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -21,7 +22,7 @@ public class Helper
 {
 	private final ArceuusRcHelperConfig config;
 	private final InventoryChecker inventoryChecker;
-	private final ReminderService reminderService;
+	private final Reminders reminders;
 	private final SceneTracker sceneTracker;
 	private final RcPathRouter pathRouter;
 	private final ShortestPathBridge shortestPathBridge;
@@ -36,18 +37,22 @@ public class Helper
 	@Getter
 	private RcMode resolvedMode = RcMode.BLOOD;
 
+	/** Reminders that applied on the last tick, in display order. */
+	@Getter
+	private List<Reminder> activeReminders = List.of();
+
 	@Inject
 	Helper(
 		ArceuusRcHelperConfig config,
 		InventoryChecker inventoryChecker,
-		ReminderService reminderService,
+		Reminders reminders,
 		SceneTracker sceneTracker,
 		RcPathRouter pathRouter,
 		ShortestPathBridge shortestPathBridge)
 	{
 		this.config = config;
 		this.inventoryChecker = inventoryChecker;
-		this.reminderService = reminderService;
+		this.reminders = reminders;
 		this.sceneTracker = sceneTracker;
 		this.pathRouter = pathRouter;
 		this.shortestPathBridge = shortestPathBridge;
@@ -58,9 +63,15 @@ public class Helper
 		return rotation.tripsCompleted();
 	}
 
+	public Integer getBloodEssenceCharges()
+	{
+		return reminders.bloodEssenceCharges();
+	}
+
 	public void reset()
 	{
 		currentAction = HelperAction.idle();
+		activeReminders = List.of();
 		rotation.reset();
 		pathRouter.reset();
 		shortestPathBridge.clear();
@@ -72,13 +83,13 @@ public class Helper
 		if (!obs.isInArceuus())
 		{
 			clearAction();
-			reminderService.update(obs);
+			activeReminders = reminders.evaluate(obs, Instant.now());
 			return;
 		}
 
 		resolvedMode = obs.getRune();
 		snapshot = obs.getInventory();
-		reminderService.update(obs);
+		activeReminders = reminders.evaluate(obs, Instant.now());
 		RotationStep step = rotation.advance(obs);
 
 		if (!config.enableHelper())

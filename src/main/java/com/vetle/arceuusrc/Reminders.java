@@ -8,15 +8,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import lombok.Getter;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.gameval.ItemID;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.util.Text;
 
+/**
+ * Decides which Reminders apply to an Observation: Gear, Lantern, Essence and Idle, in that
+ * order. Blood Essence charges are remembered between ticks from chat messages and the Item
+ * Charges plugin; the idle timer is driven by the clock the caller passes in.
+ */
 @Singleton
-public class ReminderService
+public class Reminders
 {
 	private static final Pattern ESSENCE_CHARGES = Pattern.compile(
 		"Your blood essence has (\\d{1,4}) charges? remaining",
@@ -33,20 +37,12 @@ public class ReminderService
 	private final ArceuusRcHelperConfig config;
 	private final ConfigManager configManager;
 
-	@Getter
-	private final List<String> warnings = new ArrayList<>();
-
-	@Getter
 	private Integer bloodEssenceCharges;
-
-	@Getter
-	private boolean idle;
-
-	private Instant lastMoveAt = Instant.now();
+	private Instant lastMoveAt;
 	private WorldPoint lastTile;
 
 	@Inject
-	ReminderService(ArceuusRcHelperConfig config, ConfigManager configManager)
+	Reminders(ArceuusRcHelperConfig config, ConfigManager configManager)
 	{
 		this.config = config;
 		this.configManager = configManager;
@@ -54,11 +50,42 @@ public class ReminderService
 
 	public void reset()
 	{
-		warnings.clear();
 		bloodEssenceCharges = null;
-		idle = false;
-		lastMoveAt = Instant.now();
+		lastMoveAt = null;
 		lastTile = null;
+	}
+
+	/** Known Blood Essence charges, or null when none is active or the count is not known yet. */
+	public Integer bloodEssenceCharges()
+	{
+		return bloodEssenceCharges;
+	}
+
+	public List<Reminder> evaluate(Observation obs, Instant now)
+	{
+		if (!obs.isInArceuus())
+		{
+			lastMoveAt = null;
+			lastTile = null;
+			return List.of();
+		}
+
+		InventorySnapshot inv = obs.getInventory();
+		RcMode rune = obs.getRune();
+		syncBloodEssenceCharges(inv);
+
+		List<Reminder> reminders = new ArrayList<>();
+		if (config.gearReminder())
+		{
+			addGear(inv, reminders);
+			addLantern(inv, rune, reminders);
+		}
+		addEssence(inv, rune, reminders);
+		if (isIdle(obs, now))
+		{
+			reminders.add(new Reminder(Reminder.Kind.IDLE, "Idle"));
+		}
+		return reminders;
 	}
 
 	public void onChatMessage(ChatMessage event)
@@ -93,69 +120,39 @@ public class ReminderService
 		}
 	}
 
-	public void update(Observation obs)
-	{
-		warnings.clear();
-		idle = false;
-
-		if (!obs.isInArceuus())
-		{
-			return;
-		}
-
-		updateIdle(obs);
-		syncBloodEssenceCharges(obs.getInventory());
-
-		if (config.gearReminder())
-		{
-			addGearWarnings(obs.getInventory(), obs.getRune());
-		}
-
-	}
-
-	private void addGearWarnings(InventorySnapshot inv, RcMode mode)
+	private static void addGear(InventorySnapshot inv, List<Reminder> out)
 	{
 		if (!inv.isHasChisel())
 		{
-			warnings.add("Need a chisel");
+			out.add(new Reminder(Reminder.Kind.GEAR, "Need a chisel"));
 		}
 		if (!inv.isHasPickaxe())
 		{
-			warnings.add("Need a pickaxe");
+			out.add(new Reminder(Reminder.Kind.GEAR, "Need a pickaxe"));
 		}
-		addLanternWarnings(inv, mode);
 	}
 
-	private void addLanternWarnings(InventorySnapshot inv, RcMode mode)
+	private void addLantern(InventorySnapshot inv, RcMode rune, List<Reminder> out)
 	{
 		if (!inv.isLanternEquipped())
 		{
-			if (inv.isLanternInInventory())
-			{
-				warnings.add("Equip your lantern");
-			}
-			else
-			{
-				warnings.add("Need a lantern");
-			}
+			out.add(new Reminder(Reminder.Kind.LANTERN,
+				inv.isLanternInInventory() ? "Equip your lantern" : "Need a lantern"));
 			return;
 		}
-
 		if (!config.lanternLogCheck())
 		{
 			return;
 		}
-
 		int id = inv.getLanternItemId();
 		if (id == ItemID.ABYSSAL_LANTERN)
 		{
-			warnings.add("Light your lantern");
+			out.add(new Reminder(Reminder.Kind.LANTERN, "Light your lantern"));
 			return;
 		}
-
-		if (!isUsefulLantern(id, mode))
+		if (!isUsefulLantern(id, rune))
 		{
-			warnings.add("Wrong lantern logs");
+			out.add(new Reminder(Reminder.Kind.LANTERN, "Wrong lantern logs"));
 		}
 	}
 
@@ -163,14 +160,51 @@ public class ReminderService
 	 * Logs that actually boost Arceuus RC after the Aug 2026 lantern change:
 	 * willow +5% runes, blisterwood +20% bloods, magic +10% runes, redwood = oak+willow.
 	 */
-	static boolean isUsefulLantern(int id, RcMode mode)
+	private static boolean isUsefulLantern(int id, RcMode rune)
 	{
 		if (id == ItemID.ABYSSAL_LANTERN_MAGIC || id == ItemID.ABYSSAL_LANTERN_REDWOOD
 			|| id == ItemID.ABYSSAL_LANTERN_WILLOW)
 		{
 			return true;
 		}
-		return mode == RcMode.BLOOD && id == ItemID.ABYSSAL_LANTERN_BLISTERWOOD;
+		return rune == RcMode.BLOOD && id == ItemID.ABYSSAL_LANTERN_BLISTERWOOD;
+	}
+
+	/** Blood only: Blood Essence is missing, not yet activated, or running low. */
+	private void addEssence(InventorySnapshot inv, RcMode rune, List<Reminder> out)
+	{
+		if (rune != RcMode.BLOOD || !config.bloodEssenceReminder())
+		{
+			return;
+		}
+		if (inv.isHasActiveBloodEssence())
+		{
+			if (bloodEssenceCharges != null && bloodEssenceCharges <= config.bloodEssenceLowCharges())
+			{
+				out.add(new Reminder(Reminder.Kind.ESSENCE, "Blood essence low: " + bloodEssenceCharges + " charges"));
+			}
+			return;
+		}
+		out.add(new Reminder(Reminder.Kind.ESSENCE,
+			inv.isHasInactiveBloodEssence() ? "Activate your blood essence" : "Need blood essence"));
+	}
+
+	private boolean isIdle(Observation obs, Instant now)
+	{
+		WorldPoint tile = obs.getPosition().getTile();
+		if (tile == null)
+		{
+			return false;
+		}
+		// Standing still while mining or chiselling is not idle.
+		boolean busy = obs.isAnimating() || !obs.isIdlePose();
+		if (busy || lastMoveAt == null || lastTile == null || lastTile.distanceTo(tile) > 0)
+		{
+			lastTile = tile;
+			lastMoveAt = now;
+			return false;
+		}
+		return Duration.between(lastMoveAt, now).getSeconds() >= config.idleReminderSeconds();
 	}
 
 	private void syncBloodEssenceCharges(InventorySnapshot inv)
@@ -213,25 +247,5 @@ public class ReminderService
 		{
 			return -1;
 		}
-	}
-
-	private void updateIdle(Observation obs)
-	{
-		WorldPoint now = obs.getPosition().getTile();
-		if (now == null)
-		{
-			return;
-		}
-
-		// Standing still while mining or chiseling is not idle.
-		boolean busy = obs.isAnimating() || !obs.isIdlePose();
-		if (busy || lastTile == null || lastTile.distanceTo(now) > 0)
-		{
-			lastTile = now;
-			lastMoveAt = Instant.now();
-			idle = false;
-			return;
-		}
-		idle = Duration.between(lastMoveAt, Instant.now()).getSeconds() >= config.idleReminderSeconds();
 	}
 }
