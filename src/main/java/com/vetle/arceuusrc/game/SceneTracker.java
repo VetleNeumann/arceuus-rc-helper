@@ -381,6 +381,8 @@ public class SceneTracker
 		return value == 0;
 	}
 
+	// Identity is intended: the despawn event carries the very instance the scene tracker stored.
+	@SuppressWarnings("ReferenceEquality")
 	private static TileObject clear(TileObject current, TileObject gone)
 	{
 		if (current == null || gone == null)

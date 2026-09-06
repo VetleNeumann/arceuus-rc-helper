@@ -1,6 +1,6 @@
 # Coding standards
 
-What `./gradlew build` cannot check. Style itself is enforced by `config/checkstyle/checkstyle.xml` (RuneLite's rules: tabs, braces on their own line, no trailing whitespace, no unused or wildcard imports) and the build fails on any violation, so this file only carries the conventions a tool cannot see.
+What `./gradlew build` cannot check. Style is enforced by `config/checkstyle/checkstyle.xml` (RuneLite's rules: tabs, braces on their own line, no trailing whitespace, no unused or wildcard imports) and auto-fixed by Spotless (`./gradlew spotlessApply`, profile in `config/spotless/`). Error Prone runs inside `compileJava` with warnings as errors. The build fails on any violation, so this file only carries the conventions a tool cannot see.
 
 ## Java
 
@@ -9,6 +9,7 @@ What `./gradlew build` cannot check. Style itself is enforced by `config/checkst
 - Name things with the vocabulary in `CONTEXT.md`. A name that needs the glossary changed goes with a glossary edit in the same PR.
 - `log.debug` for diagnostics. `log.info` only for one-off lifecycle messages: RuneLite ships at INFO and per-tick info lines pollute every user's log.
 - Anything the Plugin Hub restricts is in `docs/RUNELITE-RULES.md`; checkstyle covers the mechanical subset.
+- An Error Prone check that fights a RuneLite idiom is disabled by name in `build.gradle` with a comment saying why, never with `@SuppressWarnings` sprinkled through the code. A single deliberate exception (an intended identity compare, say) gets the annotation on that one method with a comment.
 
 ## Tests
 

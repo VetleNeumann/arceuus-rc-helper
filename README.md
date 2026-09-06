@@ -67,7 +67,7 @@ The idle reminder never sends a RuneLite notification: no sound, no tray popup, 
 
 ## Development
 
-Hard fork of [JamsRepos/zeah-rc-helper](https://github.com/JamsRepos/zeah-rc-helper); not on the Plugin Hub. Requires JDK 11.
+Hard fork of [JamsRepos/zeah-rc-helper](https://github.com/JamsRepos/zeah-rc-helper); not on the Plugin Hub. Builds on JDK 21 and targets Java 11 (see `docs/adr/0006-build-on-jdk-21-target-java-11.md`).
 
 ```bash
 ./gradlew build   # compile, checkstyle, tests

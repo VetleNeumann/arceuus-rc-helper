@@ -4,7 +4,7 @@
 
 ## Checklist
 
-- [ ] `./gradlew build` passes locally (compile, checkstyle, tests)
+- [ ] `./gradlew build` passes locally (Error Prone, Spotless, checkstyle, tests)
 - [ ] New or changed logic has a unit test (overlays exempt)
 - [ ] `CHANGELOG.md` Unreleased section updated (for `feat`/`fix`)
 - [ ] Docs touched by this change updated in the same PR (`README.md`, `CONTEXT.md`, `docs/`)

@@ -1,6 +1,7 @@
 package com.vetle.arceuusrc.game;
 
 import com.vetle.arceuusrc.InventorySnapshot;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
@@ -270,7 +271,7 @@ public class InventoryChecker
 		{
 			return false;
 		}
-		String name = def.getName().toLowerCase();
+		String name = def.getName().toLowerCase(Locale.ROOT);
 		return name.contains("pickaxe") || name.contains("pick axe");
 	}
 }

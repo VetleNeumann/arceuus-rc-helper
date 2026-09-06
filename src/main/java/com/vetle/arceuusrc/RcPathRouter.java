@@ -322,6 +322,8 @@ public class RcPathRouter
 	}
 
 	/**
+	 * Projects a point onto the segment A→B.
+	 *
 	 * @return {t permille along A→B (0-1000), Chebyshev distance to the segment}
 	 */
 	static int[] projectOntoSegment(WorldPoint point, WorldPoint a, WorldPoint b)

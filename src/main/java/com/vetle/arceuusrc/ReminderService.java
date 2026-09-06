@@ -232,6 +232,6 @@ public class ReminderService
 			idle = false;
 			return;
 		}
-		idle = Duration.between(lastMoveAt, Instant.now()).getSeconds() >= config.idleReminderSeconds();
+		idle = Duration.between(lastMoveAt, Instant.now()).toSeconds() >= config.idleReminderSeconds();
 	}
 }

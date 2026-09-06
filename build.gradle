@@ -1,6 +1,21 @@
 plugins {
 	id 'java'
 	id 'checkstyle'
+	id 'com.diffplug.spotless' version '8.10.2'
+	id 'net.ltgt.errorprone' version '5.1.1'
+}
+
+// Spotless and Error Prone run inside Gradle and need a modern JVM. The plugin itself is still
+// compiled for Java 11 via options.release below. See docs/adr/0006-build-on-jdk-21-target-java-11.md.
+if (JavaVersion.current() < JavaVersion.VERSION_17) {
+	throw new GradleException("Run Gradle on JDK 17 or newer (found ${JavaVersion.current()}). " +
+		"The plugin still targets Java 11; see docs/adr/0006-build-on-jdk-21-target-java-11.md.")
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
 }
 
 repositories {
@@ -24,6 +39,8 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.30'
 	annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
+	errorprone 'com.google.errorprone:error_prone_core:2.50.0'
+
 	testImplementation 'junit:junit:4.13.2'
 	testImplementation 'org.mockito:mockito-core:5.14.2'
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
@@ -43,9 +60,37 @@ checkstyle {
 	maxWarnings = 0
 }
 
+spotless {
+	java {
+		target 'src/**/*.java'
+		removeUnusedImports()
+		eclipse().configFile('config/spotless/eclipse-runelite.properties')
+		leadingSpacesToTabs()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+	format 'misc', {
+		target '*.gradle', '*.properties', '*.sh', '.gitignore', '.editorconfig', '.github/**/*.yml', 'config/**/*.xml', 'config/**/*.properties'
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+	format 'markdown', {
+		// Trailing double-space is a hard line break in Markdown, so only the final newline is enforced.
+		target '*.md', 'docs/**/*.md'
+		endWithNewline()
+	}
+}
+
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'
 	options.release.set(11)
+	// Error Prone warnings fail the build; a check that fights a RuneLite idiom is disabled here by name.
+	options.compilerArgs << '-Werror'
+	options.errorprone {
+		disableWarningsInGeneratedCode = true
+		// RuneLite value types that are immutable but not annotated as such (Lombok @Value upstream).
+		option('Immutable:KnownImmutable', 'net.runelite.api.coords.WorldPoint')
+	}
 }
 
 tasks.register('run', JavaExec) {
