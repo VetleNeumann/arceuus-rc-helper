@@ -134,6 +134,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
+		measurementLogger.onConfigChanged(event);
 		if (!ArceuusRcHelperConfig.GROUP.equals(event.getGroup()))
 		{
 			return;

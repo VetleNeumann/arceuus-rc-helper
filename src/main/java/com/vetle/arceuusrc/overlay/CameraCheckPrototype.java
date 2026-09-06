@@ -168,21 +168,23 @@ public class CameraCheckPrototype
 		}
 	}
 
-	// Landing Tile guesses (#23 measures the real ones). Model ids and orientations from
-	// docs/research/target-geometry.md; Blood Altar SW is the in-game tile, not the cache one.
+	// Landing Tiles measured in game 2026-09-06/07 (#23) from the tile the player stood on at each
+	// scene-object click. Far Bind lands the player east of the altar at 1719,3828, and the return
+	// Scramble is clicked from there. Scramble S (69 south, return trip) was not walked; guess.
+	// Model ids and orientations from docs/research/target-geometry.md.
 	public static final List<Hop> BLOOD_HOPS = List.of(
-		new Hop("Mine", new WorldPoint(1762, 3854, 0), 0,
+		new Hop("Mine", new WorldPoint(1752, 3854, 0), 0,
 			new Target(new WorldPoint(1762, 3856, 0), 5, 30836, 3),
 			new Target(new WorldPoint(1762, 3844, 0), 5, 30836, 0)),
-		new Hop("Scramble N", new WorldPoint(1761, 3872, 0), 69,
+		new Hop("Scramble N", new WorldPoint(1762, 3855, 0), 69,
 			new Target(new WorldPoint(1761, 3873, 0), 1, 9237, 2)),
-		new Hop("Venerate", new WorldPoint(1718, 3878, 0), 0,
+		new Hop("Venerate", new WorldPoint(1761, 3874, 0), 0,
 			new Target(new WorldPoint(1715, 3882, 0), 3, 30837, 0)),
-		new Hop("Scramble S", new WorldPoint(1761, 3874, 0), 69,
+		new Hop("Scramble S", new WorldPoint(1719, 3828, 0), 69,
 			new Target(new WorldPoint(1761, 3873, 0), 1, 9237, 2)),
-		new Hop("Far Bind", new WorldPoint(1735, 3828, 0), 0,
-			new Target(new WorldPoint(1716, 3829, 0), 4, 30835, 0)),
-		new Hop("Scramble W", new WorldPoint(1742, 3854, 0), 73,
+		new Hop("Far Bind", new WorldPoint(1718, 3878, 0), 0,
+			new Target(new WorldPoint(1715, 3828, 0), 4, 30835, 0)),
+		new Hop("Scramble W", new WorldPoint(1719, 3828, 0), 73,
 			new Target(new WorldPoint(1743, 3854, 0), 1, 9237, 1))
 	);
 

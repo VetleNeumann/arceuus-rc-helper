@@ -42,6 +42,7 @@ import net.runelite.api.events.GroundObjectDespawned;
 import net.runelite.api.events.GroundObjectSpawned;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.events.ConfigChanged;
 
 /**
  * THROWAWAY (wayfinder #23): logs the numbers the Sightline engine and its thresholds need, so
@@ -93,6 +94,8 @@ public class MeasurementLogger
 	private final Map<String, TileObject> targets = new HashMap<>();
 
 	private int tick;
+	/** LOGGED_IN fires before the interface loads, so SETUP waits for the first tick with a layout. */
+	private boolean setupPending;
 	private RotationStep lastStep = RotationStep.IDLE;
 	private String lastCamKey = "";
 	private WorldPoint lastSelfCheckTile;
@@ -114,7 +117,7 @@ public class MeasurementLogger
 		}
 		else if (event.getGameState() == GameState.LOGGED_IN)
 		{
-			logSetup();
+			setupPending = true;
 			logHeights();
 		}
 	}
@@ -129,6 +132,15 @@ public class MeasurementLogger
 			return;
 		}
 		WorldPoint tile = player.getWorldLocation();
+		if (client.getScale() == 0 || client.getGameState() != GameState.LOGGED_IN)
+		{
+			return; // login screen or loading: the camera numbers are meaningless there
+		}
+		if (setupPending && client.getTopLevelInterfaceId() != -1 && client.getViewportHeight() > 0)
+		{
+			setupPending = false;
+			logSetup();
+		}
 
 		RotationStep step = helper.getCurrentStep();
 		if (step != lastStep)
@@ -148,6 +160,16 @@ public class MeasurementLogger
 		}
 
 		selfCheck(tile, camChanged);
+	}
+
+	/** Camera plugin ("zoom" group) changes: relaxer and zoom limits flip mid-session. */
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if ("zoom".equals(event.getGroup()))
+		{
+			log.info("MEASURE CONFIG tick={} group={} key={} old={} new={}", tick, event.getGroup(),
+				event.getKey(), event.getOldValue(), event.getNewValue());
+		}
 	}
 
 	public void onMenuOptionClicked(MenuOptionClicked event)
@@ -265,7 +287,7 @@ public class MeasurementLogger
 		boolean onLanding = false;
 		for (Hop hop : CameraCheckPrototype.BLOOD_HOPS)
 		{
-			if (hop.getLanding().equals(tile))
+			if (near(hop.getLanding(), tile))
 			{
 				onLanding = true;
 				break;
@@ -287,7 +309,7 @@ public class MeasurementLogger
 		for (Result result : prototype.getResults())
 		{
 			Hop hop = result.getHop();
-			if (!hop.getLanding().equals(tile))
+			if (!near(hop.getLanding(), tile))
 			{
 				continue;
 			}
@@ -313,9 +335,9 @@ public class MeasurementLogger
 					delta = String.format(Locale.ROOT, " dCentre=%.1f,%.1f dist=%.1f overlap=%.2f",
 						dx, dy, Math.hypot(dx, dy), overlap);
 				}
-				log.info("MEASURE SELFCHECK tick={} hop=\"{}\" targetSw={} verdict={} cause={} free={}% {} {}{}",
-					tick, hop.getName(), wp(target.getSw()), result.getVerdict(), result.getCause(),
-					result.getFreePercent(), predBox, realBox, delta);
+				log.info("MEASURE SELFCHECK tick={} hop=\"{}\" landing={} tile={} targetSw={} verdict={} cause={} free={}% {} {}{}",
+					tick, hop.getName(), wp(hop.getLanding()), wp(tile), wp(target.getSw()), result.getVerdict(),
+					result.getCause(), result.getFreePercent(), predBox, realBox, delta);
 			}
 		}
 	}
@@ -428,6 +450,13 @@ public class MeasurementLogger
 			|| action == MenuAction.GAME_OBJECT_FIFTH_OPTION
 			|| action == MenuAction.ITEM_USE_ON_GAME_OBJECT
 			|| action == MenuAction.WIDGET_TARGET_ON_GAME_OBJECT;
+	}
+
+	/** Within one tile (Chebyshev), same plane: Landing Tiles drift by a tile between Trips. */
+	private static boolean near(WorldPoint a, WorldPoint b)
+	{
+		return a.getPlane() == b.getPlane()
+			&& Math.abs(a.getX() - b.getX()) <= 1 && Math.abs(a.getY() - b.getY()) <= 1;
 	}
 
 	private static String key(TileObject o)
