@@ -3,7 +3,7 @@ package com.vetle.arceuusrc.overlay;
 import com.vetle.arceuusrc.HelperAction;
 import com.vetle.arceuusrc.InventorySnapshot;
 import com.vetle.arceuusrc.RcMode;
-import com.vetle.arceuusrc.ReminderService;
+import com.vetle.arceuusrc.Reminder;
 import com.vetle.arceuusrc.Helper;
 import com.vetle.arceuusrc.RotationStep;
 import com.vetle.arceuusrc.ArceuusRcHelperConfig;
@@ -31,20 +31,17 @@ public class StatusOverlay extends OverlayPanel
 
 	private final ArceuusRcHelperConfig config;
 	private final Helper helper;
-	private final ReminderService reminderService;
 
 	@Inject
 	private StatusOverlay(
 		ArceuusRcHelperPlugin plugin,
 		ArceuusRcHelperConfig config,
-		Helper helper,
-		ReminderService reminderService)
+		Helper helper)
 	{
 		super(plugin);
 		setPosition(OverlayPosition.TOP_LEFT);
 		this.config = config;
 		this.helper = helper;
-		this.reminderService = reminderService;
 		panelComponent.setBorder(new Rectangle(8, 8, 8, 8));
 		panelComponent.setGap(new Point(0, 4));
 		panelComponent.setPreferredSize(SIZE);
@@ -63,8 +60,8 @@ public class StatusOverlay extends OverlayPanel
 		boolean inRotation = config.enableHelper()
 			&& action != null
 			&& action.getStep() != RotationStep.IDLE;
-		List<String> warnings = reminderService.getWarnings();
-		if (!inRotation && warnings.isEmpty())
+		List<Reminder> reminders = helper.getActiveReminders();
+		if (!inRotation && reminders.isEmpty())
 		{
 			return null;
 		}
@@ -83,23 +80,21 @@ public class StatusOverlay extends OverlayPanel
 			panelComponent.getChildren().add(line("Next", action.getStep().getLabel(), stepColor));
 		}
 
-		if (inv != null)
-		{
-			panelComponent.getChildren().add(line("Dense", String.valueOf(inv.getDenseBlocks()), LABEL));
-			panelComponent.getChildren().add(line("Dark", String.valueOf(inv.getDarkBlocks()), LABEL));
-			panelComponent.getChildren().add(line("Fragments", String.valueOf(inv.getFragments()), LABEL));
-			panelComponent.getChildren().add(line("Trips", String.valueOf(helper.getTripsCompleted()), LABEL));
+		panelComponent.getChildren().add(line("Dense", String.valueOf(inv.getDenseBlocks()), LABEL));
+		panelComponent.getChildren().add(line("Dark", String.valueOf(inv.getDarkBlocks()), LABEL));
+		panelComponent.getChildren().add(line("Fragments", String.valueOf(inv.getFragments()), LABEL));
+		panelComponent.getChildren().add(line("Trips", String.valueOf(helper.getTripsCompleted()), LABEL));
 
-			if (mode == RcMode.BLOOD)
-			{
-				panelComponent.getChildren().add(line("Essence", essenceText(inv), essenceColor(inv)));
-			}
+		if (mode == RcMode.BLOOD)
+		{
+			Color essenceColor = inv.isHasActiveBloodEssence() ? ESSENCE_OK : LABEL;
+			panelComponent.getChildren().add(line("Essence", essenceText(inv), essenceColor));
 		}
 
-		for (String warning : warnings)
+		for (Reminder reminder : reminders)
 		{
 			panelComponent.getChildren().add(LineComponent.builder()
-				.left(warning)
+				.left(reminder.getText())
 				.leftColor(WARN)
 				.build());
 		}
@@ -117,37 +112,14 @@ public class StatusOverlay extends OverlayPanel
 			.build();
 	}
 
+	/** Plain state of the Blood Essence; whether it needs attention is a Reminder, not this row. */
 	private String essenceText(InventorySnapshot inv)
 	{
 		if (inv.isHasActiveBloodEssence())
 		{
-			Integer charges = reminderService.getBloodEssenceCharges();
-			if (charges != null)
-			{
-				return charges + " charges";
-			}
-			return "active";
+			Integer charges = helper.getBloodEssenceCharges();
+			return charges != null ? charges + " charges" : "active";
 		}
-		if (inv.isHasInactiveBloodEssence())
-		{
-			return config.bloodEssenceReminder() ? "activate" : "inactive";
-		}
-		return config.bloodEssenceReminder() ? "need one" : "none";
-	}
-
-	private Color essenceColor(InventorySnapshot inv)
-	{
-		if (inv.isHasActiveBloodEssence())
-		{
-			Integer charges = reminderService.getBloodEssenceCharges();
-			if (config.bloodEssenceReminder()
-				&& charges != null
-				&& charges <= config.bloodEssenceLowCharges())
-			{
-				return WARN;
-			}
-			return ESSENCE_OK;
-		}
-		return config.bloodEssenceReminder() ? WARN : LABEL;
+		return inv.isHasInactiveBloodEssence() ? "inactive" : "none";
 	}
 }

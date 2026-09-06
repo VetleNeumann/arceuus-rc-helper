@@ -9,6 +9,7 @@ All notable changes to this plugin. Format: [Keep a Changelog](https://keepachan
 - Forked from JamsRepos/zeah-rc-helper and renamed to Arceuus RC Helper: package `com.vetle.arceuusrc`, config group `arceuus-rc-helper`, the gear reminder key is now `gearReminder`. Settings reset once on upgrade.
 - Release notes live in this file and on GitHub Releases instead of in game chat.
 - Trips keep counting while the Helper is switched off; only the Next Action is suppressed.
+- The Status Panel lists every active Reminder as a warning line: gear, lantern, Blood Essence (missing, inactive or low) and Idle. The Essence row itself now shows plain state (charges, active, inactive, none) without colouring it as a warning.
 
 ### Removed
 
@@ -20,6 +21,7 @@ All notable changes to this plugin. Format: [Keep a Changelog](https://keepachan
 - CI on every push and PR, tag-driven GitHub Releases, a weekly build against RuneLite snapshots, Dependabot.
 - The version is read from `runelite-plugin.properties` only.
 - Logic modules take a per-tick `Observation` value instead of reading the RuneLite `Client` (ADR-0005); Step inference and Trip counting live in `Rotation` with a table of unit tests.
+- `Reminders` returns typed `Reminder` values from one `evaluate` call that takes the clock; all four kinds and the idle timer are unit-tested. Replaces `ReminderService`.
 - Tracked dev loop (`dev.sh`, `tools/dev.ps1`), glossary (`CONTEXT.md`), standards and ADRs under `docs/`.
 
 ## [1.0.4] - 2026-09-05

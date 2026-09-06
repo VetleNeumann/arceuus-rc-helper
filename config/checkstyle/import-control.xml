@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE import-control PUBLIC
+		"-//Checkstyle//DTD ImportControl Configuration 1.4//EN"
+		"https://checkstyle.org/dtds/import_control_1_4.dtd">
+<!--
+ The seam from ADR-0005: only the game package (adapters that read the client) and the overlay
+ package (drawers) may import the RuneLite Client. Logic in the root package takes an
+ Observation value instead.
+-->
+<import-control pkg="com.vetle.arceuusrc" strategyOnMismatch="allowed">
+	<disallow class="net.runelite.api.Client" local-only="true"/>
+	<subpackage name="game">
+		<allow class="net.runelite.api.Client"/>
+	</subpackage>
+	<subpackage name="overlay">
+		<allow class="net.runelite.api.Client"/>
+	</subpackage>
+</import-control>
