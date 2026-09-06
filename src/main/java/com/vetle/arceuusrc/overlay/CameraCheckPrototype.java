@@ -2,22 +2,24 @@ package com.vetle.arceuusrc.overlay;
 
 import com.vetle.arceuusrc.ArceuusRcHelperConfig;
 import java.awt.Color;
-import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Getter;
 import net.runelite.api.Client;
+import net.runelite.api.Model;
 import net.runelite.api.Perspective;
 import net.runelite.api.Player;
-import net.runelite.api.Point;
+import net.runelite.api.Skill;
 import net.runelite.api.WorldView;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
@@ -110,28 +112,39 @@ public class CameraCheckPrototype
 		private final String name;
 		private final WorldPoint landing;
 		/** Candidate targets; the Hop takes the best one (the runestone Hop has two rocks). */
-		private final List<Footprint> targets;
-		private final boolean shortcut;
+		private final List<Target> targets;
+		/** Agility needed for this Hop; 0 for a Hop that is not a Shortcut. */
+		private final int minAgility;
 
-		Hop(String name, WorldPoint landing, boolean shortcut, Footprint... targets)
+		Hop(String name, WorldPoint landing, int minAgility, Target... targets)
 		{
 			this.name = name;
 			this.landing = landing;
-			this.shortcut = shortcut;
+			this.minAgility = minAgility;
 			this.targets = List.of(targets);
+		}
+
+		boolean shortcut()
+		{
+			return minAgility > 0;
 		}
 	}
 
+	/** A scene object as the cache knows it: footprint, mesh id and loc orientation (0..3). */
 	@Getter
-	public static final class Footprint
+	public static final class Target
 	{
 		private final WorldPoint sw;
 		private final int size;
+		private final int modelId;
+		private final int orientation;
 
-		Footprint(WorldPoint sw, int size)
+		Target(WorldPoint sw, int size, int modelId, int orientation)
 		{
 			this.sw = sw;
 			this.size = size;
+			this.modelId = modelId;
+			this.orientation = orientation;
 		}
 	}
 
@@ -155,23 +168,22 @@ public class CameraCheckPrototype
 		}
 	}
 
-	// Landing Tile guesses. #23 measures the real ones.
+	// Landing Tile guesses (#23 measures the real ones). Model ids and orientations from
+	// docs/research/target-geometry.md; Blood Altar SW is the in-game tile, not the cache one.
 	static final List<Hop> BLOOD_HOPS = List.of(
-		new Hop("Mine", new WorldPoint(1762, 3854, 0), false,
-			new Footprint(new WorldPoint(1762, 3856, 0), 5),
-			new Footprint(new WorldPoint(1762, 3844, 0), 5)),
-		new Hop("Scramble N", new WorldPoint(1761, 3872, 0), true,
-			new Footprint(new WorldPoint(1761, 3873, 0), 1)),
-		new Hop("Venerate", new WorldPoint(1718, 3878, 0), false,
-			new Footprint(new WorldPoint(1715, 3882, 0), 3)),
-		new Hop("Scramble S", new WorldPoint(1761, 3874, 0), true,
-			new Footprint(new WorldPoint(1761, 3873, 0), 1)),
-		new Hop("Far Bind", new WorldPoint(1735, 3828, 0), false,
-			new Footprint(new WorldPoint(1716, 3829, 0), 4)),
-		new Hop("Craft", new WorldPoint(1717, 3828, 0), false,
-			new Footprint(new WorldPoint(1716, 3829, 0), 4)),
-		new Hop("Scramble W", new WorldPoint(1742, 3854, 0), true,
-			new Footprint(new WorldPoint(1743, 3854, 0), 1))
+		new Hop("Mine", new WorldPoint(1762, 3854, 0), 0,
+			new Target(new WorldPoint(1762, 3856, 0), 5, 30836, 3),
+			new Target(new WorldPoint(1762, 3844, 0), 5, 30836, 0)),
+		new Hop("Scramble N", new WorldPoint(1761, 3872, 0), 69,
+			new Target(new WorldPoint(1761, 3873, 0), 1, 9237, 2)),
+		new Hop("Venerate", new WorldPoint(1718, 3878, 0), 0,
+			new Target(new WorldPoint(1715, 3882, 0), 3, 30837, 0)),
+		new Hop("Scramble S", new WorldPoint(1761, 3874, 0), 69,
+			new Target(new WorldPoint(1761, 3873, 0), 1, 9237, 2)),
+		new Hop("Far Bind", new WorldPoint(1735, 3828, 0), 0,
+			new Target(new WorldPoint(1716, 3829, 0), 4, 30835, 0)),
+		new Hop("Scramble W", new WorldPoint(1742, 3854, 0), 73,
+			new Target(new WorldPoint(1743, 3854, 0), 1, 9237, 1))
 	);
 
 	private static final double CLEAR_FREE = 0.90;
@@ -192,6 +204,9 @@ public class CameraCheckPrototype
 
 	@Getter
 	private List<Result> results = Collections.emptyList();
+
+	/** Meshes loaded from the cache by model id; loadModel returns null until the cache has them. */
+	private final Map<Integer, Model> models = new HashMap<>();
 
 	@Inject
 	CameraCheckPrototype(Client client, ArceuusRcHelperConfig config)
@@ -232,20 +247,25 @@ public class CameraCheckPrototype
 		int camTileY = (client.getCameraY() >> 7) - playerLocal.getSceneY();
 		int drawDistance = client.isGpu() ? wv.getScene().getDrawDistance() : CPU_DRAW_DISTANCE;
 
+		int agility = client.getBoostedSkillLevel(Skill.AGILITY);
 		List<Result> out = new ArrayList<>();
 		for (Hop hop : BLOOD_HOPS)
 		{
-			if (hop.shortcut && config.protoSimulateUnknown())
+			if (agility < hop.minAgility)
+			{
+				continue;
+			}
+			if (hop.shortcut() && config.protoSimulateUnknown())
 			{
 				out.add(new Result(hop, Verdict.UNKNOWN, Cause.NONE, 0, null));
 				continue;
 			}
 			Result best = null;
-			for (Footprint target : hop.targets)
+			for (Target target : hop.targets)
 			{
 				Result r = judge(hop, target, wv, plane, playerTile, playerLocal, playerHeight,
 					viewport, cover, camTileX, camTileY, drawDistance);
-				if (best == null || r.freePercent > best.freePercent)
+				if (best == null || rank(r) > rank(best))
 				{
 					best = r;
 				}
@@ -256,7 +276,7 @@ public class CameraCheckPrototype
 	}
 
 	private Result judge(
-		Hop hop, Footprint target, WorldView wv, int plane,
+		Hop hop, Target target, WorldView wv, int plane,
 		WorldPoint playerTile, LocalPoint playerLocal, int playerHeight,
 		Rectangle viewport, Map<Cause, Area> cover,
 		int camTileX, int camTileY, int drawDistance)
@@ -277,19 +297,21 @@ public class CameraCheckPrototype
 		// Height: keep the target's rise over its Landing Tile when both are in scene, else flat.
 		int z = playerHeight + heightDelta(wv, plane, target, hop.landing);
 
-		Area shape = new Area();
-		for (int dx = 0; dx < target.size; dx++)
+		Model model = model(target.modelId);
+		if (model == null)
 		{
-			for (int dy = 0; dy < target.size; dy++)
-			{
-				WorldPoint tile = new WorldPoint(target.sw.getX() + dx + shiftX, target.sw.getY() + dy + shiftY, plane);
-				Polygon poly = tilePoly(playerLocal, playerTile, tile, z);
-				if (poly != null)
-				{
-					shape.add(new Area(poly));
-				}
-			}
+			return new Result(hop, Verdict.UNKNOWN, Cause.NONE, 0, null);
 		}
+		// Object centre in the shifted frame: SW tile centre plus half the footprint.
+		int half = (target.size - 1) * Perspective.LOCAL_HALF_TILE_SIZE;
+		int cx = playerLocal.getX() + (target.sw.getX() + shiftX - playerTile.getX()) * Perspective.LOCAL_TILE_SIZE + half;
+		int cy = playerLocal.getY() + (target.sw.getY() + shiftY - playerTile.getY()) * Perspective.LOCAL_TILE_SIZE + half;
+		Shape clickbox = Perspective.getClickbox(client, wv, model, target.orientation * 512, cx, cy, z);
+		if (clickbox == null)
+		{
+			return new Result(hop, Verdict.HIDDEN, Cause.BEHIND, 0, null);
+		}
+		Area shape = new Area(clickbox);
 		double total = area(shape);
 		if (total <= 0)
 		{
@@ -340,7 +362,7 @@ public class CameraCheckPrototype
 		return new Result(hop, verdict, cause, percent, shape);
 	}
 
-	private int heightDelta(WorldView wv, int plane, Footprint target, WorldPoint landing)
+	private int heightDelta(WorldView wv, int plane, Target target, WorldPoint landing)
 	{
 		LocalPoint t = LocalPoint.fromWorld(wv, target.sw);
 		LocalPoint l = LocalPoint.fromWorld(wv, landing);
@@ -351,26 +373,24 @@ public class CameraCheckPrototype
 		return Perspective.getTileHeight(client, t, plane) - Perspective.getTileHeight(client, l, plane);
 	}
 
-	/** Polygon of a tile that may lie outside the scene, built from local offsets off the player. */
-	private Polygon tilePoly(LocalPoint playerLocal, WorldPoint playerTile, WorldPoint tile, int z)
+	private Model model(int id)
 	{
-		int cx = playerLocal.getX() + (tile.getX() - playerTile.getX()) * Perspective.LOCAL_TILE_SIZE;
-		int cy = playerLocal.getY() + (tile.getY() - playerTile.getY()) * Perspective.LOCAL_TILE_SIZE;
-		int h = Perspective.LOCAL_HALF_TILE_SIZE;
-		Point a = Perspective.localToCanvas(client, cx - h, cy - h, z);
-		Point b = Perspective.localToCanvas(client, cx + h, cy - h, z);
-		Point c = Perspective.localToCanvas(client, cx + h, cy + h, z);
-		Point d = Perspective.localToCanvas(client, cx - h, cy + h, z);
-		if (a == null || b == null || c == null || d == null)
+		Model m = models.get(id);
+		if (m == null)
 		{
-			return null;
+			m = client.loadModel(id);
+			if (m != null)
+			{
+				models.put(id, m);
+			}
 		}
-		Polygon poly = new Polygon();
-		poly.addPoint(a.getX(), a.getY());
-		poly.addPoint(b.getX(), b.getY());
-		poly.addPoint(c.getX(), c.getY());
-		poly.addPoint(d.getX(), d.getY());
-		return poly;
+		return m;
+	}
+
+	/** Best candidate for a Hop: a known verdict beats Unknown, then more free area wins. */
+	private static int rank(Result r)
+	{
+		return r.verdict == Verdict.UNKNOWN ? -1 : r.freePercent;
 	}
 
 	/** Cover rects by cause for the current layout; widgets read live on the client thread. */
