@@ -105,6 +105,26 @@ public class GuidanceTest
 	}
 
 	@Test
+	public void fragmentEstimateFollowsTheSnapshotItsToggleAndTheHelper()
+	{
+		InventorySnapshot inferred = carrying(13, false);
+		FragmentEstimate shown = decide(inferred).getFragmentEstimate();
+		assertTrue(shown.isShown());
+		assertEquals(13, shown.getCount());
+		assertFalse(shown.isConfirmed());
+
+		assertTrue(decide(carrying(27, true)).getFragmentEstimate().isConfirmed());
+		assertFalse(decide(carrying(0, false)).getFragmentEstimate().isShown());
+
+		config.showFragmentEstimate = false;
+		assertFalse(decide(inferred).getFragmentEstimate().isShown());
+
+		config.showFragmentEstimate = true;
+		config.enableHelper = false;
+		assertFalse(decide(inferred).getFragmentEstimate().isShown());
+	}
+
+	@Test
 	public void noneShowsNothing()
 	{
 		Guidance g = Guidance.none();
@@ -113,6 +133,17 @@ public class GuidanceTest
 		assertTrue(g.getReminders().isEmpty());
 		assertEquals(FarBind.State.NONE, g.getFarBind());
 		assertTrue(g.getFarBindArea().isEmpty());
+		assertFalse(g.getFragmentEstimate().isShown());
+	}
+
+	private Guidance decide(InventorySnapshot inv)
+	{
+		return Guidance.decide(config, mining(), List.of(), FarBind.State.NONE, List.of(), inv);
+	}
+
+	private static InventorySnapshot carrying(int fragments, boolean confirmed)
+	{
+		return new InventorySnapshot(0, 0, fragments, confirmed, 27, true, true, false, false, true, false, -1);
 	}
 
 	private static NextAction mining()
@@ -128,6 +159,13 @@ public class GuidanceTest
 		boolean showStatusPanel = true;
 		boolean idleFlash = false;
 		boolean showFarBind = true;
+		boolean showFragmentEstimate = true;
+
+		@Override
+		public boolean showFragmentEstimate()
+		{
+			return showFragmentEstimate;
+		}
 
 		@Override
 		public boolean showFarBind()

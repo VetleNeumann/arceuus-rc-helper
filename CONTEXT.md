@@ -43,6 +43,10 @@ _Avoid_: dark essence, dark
 The stackable item produced by chiselling a Dark Block. Crafted into runes at the Blood or Soul Altar. The game hides the stack size, so the plugin estimates it.
 _Avoid_: dark essence fragments, frags, essence
 
+**Fragment Estimate**:
+The plugin's best figure for the hidden Fragment stack size. Confirmed when the game has stated it (a visible quantity or the "roughly equivalent to N pieces" check message); inferred when the plugin has only reasoned it out from chiselling and inventory shape. Drawn on the Fragment stack and shown in the Status Panel.
+_Avoid_: fragment count (implies the game told us)
+
 **Full Stack**:
 Enough Fragments held that the next load of Dense Blocks can be carried straight to the altar instead of being chiselled first.
 

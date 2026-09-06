@@ -113,6 +113,19 @@ public interface ArceuusRcHelperConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "showFragmentEstimate",
+		name = "Fragment estimate",
+		description = "Draw the estimated stack size on the fragments in your inventory: "
+			+ "cyan when the game has confirmed it, yellow when the plugin has worked it out",
+		section = helperSection,
+		position = 7
+	)
+	default boolean showFragmentEstimate()
+	{
+		return true;
+	}
+
+	@ConfigItem(
 		keyName = "gearReminder",
 		name = "Gear reminders",
 		description = "Remind you to bring a chisel (including jeweller's), a pickaxe, and an abyssal lantern",

@@ -5,6 +5,7 @@ import com.vetle.arceuusrc.game.SceneTracker;
 import com.vetle.arceuusrc.game.ShortestPathBridge;
 import com.google.inject.Provides;
 import com.vetle.arceuusrc.overlay.FarBindOverlay;
+import com.vetle.arceuusrc.overlay.FragmentEstimateOverlay;
 import com.vetle.arceuusrc.overlay.IdleTintOverlay;
 import com.vetle.arceuusrc.overlay.NextClickOverlay;
 import com.vetle.arceuusrc.overlay.PathMinimapOverlay;
@@ -60,6 +61,9 @@ public class ArceuusRcHelperPlugin extends Plugin
 	private FarBindOverlay farBindOverlay;
 
 	@Inject
+	private FragmentEstimateOverlay fragmentEstimateOverlay;
+
+	@Inject
 	private Helper helper;
 
 	@Inject
@@ -90,6 +94,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 		overlayManager.add(statusOverlay);
 		overlayManager.add(idleTintOverlay);
 		overlayManager.add(farBindOverlay);
+		overlayManager.add(fragmentEstimateOverlay);
 		log.debug("Arceuus RC Helper started");
 	}
 
@@ -101,6 +106,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 		overlayManager.remove(statusOverlay);
 		overlayManager.remove(idleTintOverlay);
 		overlayManager.remove(farBindOverlay);
+		overlayManager.remove(fragmentEstimateOverlay);
 		helper.reset();
 		reminders.reset();
 		sceneTracker.reset();

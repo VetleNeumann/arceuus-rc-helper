@@ -26,11 +26,13 @@ public class FragmentTracker
 		Pattern.CASE_INSENSITIVE);
 
 	private int trackedFragments;
+	private boolean confirmed;
 	private int lastDarkBlocks = -1;
 
 	public void reset()
 	{
 		trackedFragments = 0;
+		confirmed = false;
 		lastDarkBlocks = -1;
 	}
 
@@ -40,6 +42,7 @@ public class FragmentTracker
 		if (COUNT_ONE.matcher(message).find())
 		{
 			trackedFragments = 1;
+			confirmed = true;
 			return;
 		}
 		Matcher many = COUNT_MANY.matcher(message);
@@ -48,6 +51,7 @@ public class FragmentTracker
 			try
 			{
 				trackedFragments = Math.min(MAX_FRAGMENTS, Integer.parseInt(many.group(1)));
+				confirmed = true;
 			}
 			catch (NumberFormatException ignored)
 			{
@@ -69,6 +73,7 @@ public class FragmentTracker
 			raw.getDenseBlocks(),
 			raw.getDarkBlocks(),
 			fragments,
+			confirmed,
 			raw.getEmptySlots(),
 			raw.isHasChisel(),
 			raw.isHasPickaxe(),
@@ -84,6 +89,7 @@ public class FragmentTracker
 		if (!hasFragmentItem)
 		{
 			trackedFragments = 0;
+			confirmed = false;
 			lastDarkBlocks = dark;
 			return 0;
 		}
@@ -92,19 +98,23 @@ public class FragmentTracker
 		if (visible > 1)
 		{
 			trackedFragments = Math.min(MAX_FRAGMENTS, visible);
+			confirmed = true;
 		}
 		else if (lastDarkBlocks >= 0 && dark < lastDarkBlocks)
 		{
 			trackedFragments = Math.min(MAX_FRAGMENTS, trackedFragments + FRAGMENTS_PER_BLOCK * (lastDarkBlocks - dark));
+			confirmed = false;
 		}
 		else if (trackedFragments <= 1 && empty == 0 && dark > 0)
 		{
 			// Second inventory: fragment stack + full bag of dark. Quantity is hidden as 1.
 			trackedFragments = TYPICAL_FULL_STACK;
+			confirmed = false;
 		}
 		else if (trackedFragments <= 0)
 		{
 			trackedFragments = Math.max(1, visible);
+			confirmed = false;
 		}
 
 		lastDarkBlocks = dark;
