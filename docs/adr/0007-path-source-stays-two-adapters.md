@@ -1,0 +1,5 @@
+# Path Source stays two concrete adapters, not one interface
+
+The two Path Sources have different shapes. Plugin Lines (`RcPathRouter`) is a pure function: tiles in, the tiles this plugin draws out. Shortest Path (`ShortestPathBridge`) is a delegation: it posts the target to the external plugin over a `PluginMessage`, that plugin draws its own line, and nothing comes back. A `PathSource` interface was designed twice and rejected both times: `List<WorldPoint> pathTo(request)` forces the Shortest Path adapter to lie (side effect, empty result), and `void show(request)` plus `ownTiles()` is honest but ceremony, because the Helper still needs the Plugin Lines tiles for the Next Action's Shortcut hop whether or not they are drawn. Either way the interface stays shallow on both sides.
+
+So the choice lives in one place, `Helper.resolvePath`, which decides whether Plugin Lines draws (`pathDisplay` on and Shortest Path not driving) and hands the target to the bridge. Do not re-suggest the interface unless a third Path Source appears with one of the two existing shapes.

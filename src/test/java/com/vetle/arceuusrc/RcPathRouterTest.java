@@ -3,6 +3,7 @@ package com.vetle.arceuusrc;
 import com.vetle.arceuusrc.game.SceneTracker;
 import java.util.Arrays;
 import java.util.List;
+import net.runelite.api.TileObject;
 import net.runelite.api.coords.WorldPoint;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -12,7 +13,7 @@ import org.junit.Test;
 
 public class RcPathRouterTest
 {
-	private final RcPathRouter router = new RcPathRouter(new SceneTracker(null));
+	private final RcPathRouter router = new RcPathRouter(new EmptyScene());
 
 	@Test
 	public void nextClickDoesNotInventAShortcutWhenPathHasNoHop()
@@ -174,5 +175,20 @@ public class RcPathRouterTest
 			}
 		}
 		return false;
+	}
+
+	/** No scene objects tracked: every Shortcut lookup answers null, as when the object is out of scene. */
+	private static class EmptyScene extends SceneTracker
+	{
+		EmptyScene()
+		{
+			super(null);
+		}
+
+		@Override
+		public TileObject objectForShortcutId(int id)
+		{
+			return null;
+		}
 	}
 }

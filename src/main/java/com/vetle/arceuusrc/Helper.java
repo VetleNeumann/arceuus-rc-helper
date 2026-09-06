@@ -108,6 +108,24 @@ public class Helper
 		TileObject destination = destinationObject(step, obs);
 		WorldPoint end = pathEnd(destination, step, atMine);
 		Color color = colorFor(step);
+		List<WorldPoint> path = resolvePath(obs, start, end, step, color);
+		RcPathRouter.ClickTarget click = pathRouter.nextClick(step, destination, path, start, atMine);
+		return new NextAction(
+			step,
+			step.detail(resolvedMode),
+			path,
+			click.getObject(),
+			click.getTile(),
+			color);
+	}
+
+	/**
+	 * The Path Source choice, made once. Plugin Lines returns the tiles this plugin draws;
+	 * Shortest Path is handed the target and draws its own line, in which case the tiles come
+	 * back empty. Two concrete adapters rather than one interface: ADR-0007.
+	 */
+	private List<WorldPoint> resolvePath(Observation obs, WorldPoint start, WorldPoint end, RotationStep step, Color color)
+	{
 		boolean ownPath = !config.pathDisplay().isOff() && !shortestPathBridge.isDriving();
 		List<WorldPoint> path = pathRouter.pathTo(
 			obs.getWorldView(),
@@ -116,17 +134,10 @@ public class Helper
 			step,
 			obs.getAgility(),
 			resolvedMode,
-			atMine,
+			obs.getPosition().isAtMine(),
 			ownPath);
-		RcPathRouter.ClickTarget click = pathRouter.nextClick(step, destination, path, start, atMine);
 		shortestPathBridge.update(start, shortestPathTarget(end, step), color, obs.getTick());
-		return new NextAction(
-			step,
-			step.detail(resolvedMode),
-			path,
-			click.getObject(),
-			click.getTile(),
-			color);
+		return path;
 	}
 
 	private void clearAction()
