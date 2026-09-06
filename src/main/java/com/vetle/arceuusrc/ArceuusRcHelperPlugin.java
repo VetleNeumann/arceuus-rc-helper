@@ -60,7 +60,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 	private Helper helper;
 
 	@Inject
-	private ReminderService reminderService;
+	private Reminders reminders;
 
 	@Inject
 	private InventoryChecker inventoryChecker;
@@ -78,7 +78,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 	protected void startUp()
 	{
 		helper.reset();
-		reminderService.reset();
+		reminders.reset();
 		inventoryChecker.reset();
 		sceneTracker.reset();
 		sceneTracker.scanScene();
@@ -97,7 +97,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 		overlayManager.remove(statusOverlay);
 		overlayManager.remove(idleTintOverlay);
 		helper.reset();
-		reminderService.reset();
+		reminders.reset();
 		sceneTracker.reset();
 		shortestPathBridge.clear();
 	}
@@ -184,7 +184,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 	@Subscribe
 	public void onChatMessage(ChatMessage event)
 	{
-		reminderService.onChatMessage(event);
+		reminders.onChatMessage(event);
 		inventoryChecker.onChatMessage(event);
 	}
 
@@ -202,7 +202,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 		else if (event.getGameState() == GameState.LOGIN_SCREEN)
 		{
 			helper.reset();
-			reminderService.reset();
+			reminders.reset();
 			inventoryChecker.reset();
 			sceneTracker.reset();
 			shortestPathBridge.clear();
