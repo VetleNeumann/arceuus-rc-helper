@@ -1,7 +1,6 @@
 package com.vetle.arceuusrc;
 
 import java.util.List;
-import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
 
 /**
@@ -65,52 +64,10 @@ public final class ArceuusRcArea
 	{
 	}
 
-	public static boolean isInArceuusRc(Client client)
+	public static boolean isInArceuusRc(WorldPoint loc)
 	{
-		WorldPoint loc = player(client);
-		if (loc == null)
-		{
-			return false;
-		}
-		return loc.getX() >= AREA_MIN_X && loc.getX() <= AREA_MAX_X
+		return loc != null
+			&& loc.getX() >= AREA_MIN_X && loc.getX() <= AREA_MAX_X
 			&& loc.getY() >= AREA_MIN_Y && loc.getY() <= AREA_MAX_Y;
-	}
-
-	public static boolean isAtMine(Client client)
-	{
-		WorldPoint loc = player(client);
-		return loc != null && (loc.distanceTo(RUNESTONE_SOUTH) <= 10 || loc.distanceTo(RUNESTONE_NORTH) <= 10);
-	}
-
-	public static boolean isAtDarkAltar(Client client)
-	{
-		WorldPoint loc = player(client);
-		return loc != null && loc.distanceTo(DARK_ALTAR) <= 12;
-	}
-
-	public static boolean isAtBloodAltar(Client client)
-	{
-		WorldPoint loc = player(client);
-		return loc != null && loc.distanceTo(BLOOD_ALTAR) <= 12;
-	}
-
-	public static boolean isAtSoulAltar(Client client)
-	{
-		WorldPoint loc = player(client);
-		return loc != null && loc.distanceTo(SOUL_ALTAR) <= 12;
-	}
-
-	public static boolean isAtCraftAltar(Client client, RcMode mode)
-	{
-		return mode == RcMode.SOUL ? isAtSoulAltar(client) : isAtBloodAltar(client);
-	}
-
-	private static WorldPoint player(Client client)
-	{
-		if (client.getLocalPlayer() == null)
-		{
-			return null;
-		}
-		return client.getLocalPlayer().getWorldLocation();
 	}
 }

@@ -19,9 +19,6 @@ import net.runelite.api.coords.WorldPoint;
 public class RotationHelper
 {
 	private static final int FULL_FRAGMENTS = 100;
-	private static final int SOUL_LEVEL = 90;
-	private static final int AT_ALTAR_TILES = 12;
-	private static final int NEAR_ALTAR_TILES = 24;
 
 	private final Client client;
 	private final ArceuusRcHelperConfig config;
@@ -35,7 +32,7 @@ public class RotationHelper
 	private HelperAction currentAction = HelperAction.idle();
 
 	@Getter
-	private InventorySnapshot snapshot = new InventorySnapshot(0, 0, 0, 28, false, false, false, false, false, false, -1);
+	private InventorySnapshot snapshot = InventorySnapshot.empty();
 
 	@Getter
 	private RcMode resolvedMode = RcMode.BLOOD;
@@ -76,7 +73,7 @@ public class RotationHelper
 
 	public void update()
 	{
-		if (!ArceuusRcArea.isInArceuusRc(client))
+		if (!ArceuusRcArea.isInArceuusRc(playerTile()))
 		{
 			currentAction = HelperAction.idle();
 			pathRouter.reset();
@@ -104,10 +101,9 @@ public class RotationHelper
 		}
 		lastStep = step;
 
-		Player player = client.getLocalPlayer();
-		WorldPoint start = player == null ? null : player.getWorldLocation();
-		boolean atMine = start != null && sceneTracker.isAtMine(start);
-		TileObject destination = destinationObject(step);
+		WorldPoint start = playerTile();
+		boolean atMine = sceneTracker.isAtMine(start);
+		TileObject destination = destinationObject(step, start);
 		WorldPoint end = pathEnd(destination, step, start);
 		WorldView worldView = client.getTopLevelWorldView();
 		int agility = client.getRealSkillLevel(Skill.AGILITY);
@@ -163,13 +159,13 @@ public class RotationHelper
 		}
 	}
 
-	private TileObject destinationObject(RotationStep step)
+	private TileObject destinationObject(RotationStep step, WorldPoint tile)
 	{
 		switch (step)
 		{
 			case MINE_FIRST:
 			case MINE_SECOND:
-				return sceneTracker.chooseRunestone();
+				return sceneTracker.chooseRunestone(tile, isAnimating());
 			case GO_DARK_FIRST:
 			case GO_DARK_SECOND:
 				return sceneTracker.getDarkAltar();
@@ -181,12 +177,11 @@ public class RotationHelper
 				return null;
 			case CHISEL_AND_RETURN:
 			case RETURN_TO_MINE:
-				Player p = client.getLocalPlayer();
-				if (p != null && sceneTracker.isAtMine(p.getWorldLocation()) && step == RotationStep.CHISEL_AND_RETURN)
+				if (sceneTracker.isAtMine(tile) && step == RotationStep.CHISEL_AND_RETURN)
 				{
 					return null;
 				}
-				return sceneTracker.chooseRunestone();
+				return sceneTracker.chooseRunestone(tile, isAnimating());
 			default:
 				return null;
 		}
@@ -243,19 +238,27 @@ public class RotationHelper
 
 	private RcMode resolveMode()
 	{
-		if (config.mode() != RcMode.AUTO)
-		{
-			return config.mode();
-		}
-		return client.getRealSkillLevel(Skill.RUNECRAFT) >= SOUL_LEVEL ? RcMode.SOUL : RcMode.BLOOD;
+		return RcMode.resolve(config.mode(), client.getRealSkillLevel(Skill.RUNECRAFT));
+	}
+
+	private WorldPoint playerTile()
+	{
+		Player player = client.getLocalPlayer();
+		return player == null ? null : player.getWorldLocation();
+	}
+
+	private boolean isAnimating()
+	{
+		Player player = client.getLocalPlayer();
+		return player != null && player.getAnimation() != -1;
 	}
 
 	private RotationStep inferStep(InventorySnapshot inv)
 	{
-		boolean atAltar = sceneTracker.isNearAltar(resolvedMode, AT_ALTAR_TILES);
-		boolean nearAltar = atAltar || sceneTracker.isNearAltar(resolvedMode, NEAR_ALTAR_TILES);
-		Player player = client.getLocalPlayer();
-		boolean atMine = player != null && sceneTracker.isAtMine(player.getWorldLocation());
+		WorldPoint tile = playerTile();
+		boolean atAltar = sceneTracker.isAtAltar(tile, resolvedMode);
+		boolean nearAltar = sceneTracker.isNearAltar(tile, resolvedMode);
+		boolean atMine = sceneTracker.isAtMine(tile);
 		boolean hasFrags = inv.getFragments() > 0;
 		boolean hasDark = inv.getDarkBlocks() > 0;
 		boolean hasDense = inv.getDenseBlocks() > 0;
