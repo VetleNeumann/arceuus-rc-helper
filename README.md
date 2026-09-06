@@ -13,7 +13,6 @@ This plugin conflicts with [Easy Arceuus Runecrafting](https://github.com/poi56i
 - **Status panel** — what to do next, plus:
   - **Dense** — uncharged blocks from the mine
   - **Dark** — blocks after the Dark Altar
-  - **Fragments** — chiselled essence ready to craft
   - **Trips** — finished runs this session
   - **Essence** — blood essence status (bloods only)
   - **Far Bind** — whether the Blood Altar can be clicked from where you stand (bloods only). After the second Dark Altar visit, step onto the marked tiles south of it and click the altar once; your character walks the rest. The path to the Dark Altar already passes that spot so the altar stays loaded.

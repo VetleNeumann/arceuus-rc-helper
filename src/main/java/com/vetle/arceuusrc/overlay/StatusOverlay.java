@@ -75,7 +75,6 @@ public class StatusOverlay extends OverlayPanel
 
 		panelComponent.getChildren().add(line("Dense", String.valueOf(inv.getDenseBlocks()), LABEL));
 		panelComponent.getChildren().add(line("Dark", String.valueOf(inv.getDarkBlocks()), LABEL));
-		panelComponent.getChildren().add(line("Fragments", String.valueOf(inv.getFragments()), LABEL));
 		panelComponent.getChildren().add(line("Trips", String.valueOf(helper.getTripsCompleted()), LABEL));
 
 		if (mode == RcMode.BLOOD)
