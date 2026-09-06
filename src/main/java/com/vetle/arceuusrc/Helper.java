@@ -101,7 +101,7 @@ public class Helper
 		{
 			clearAction();
 		}
-		guidance = Guidance.decide(config, currentAction, activeReminders, farBind, farBindArea);
+		guidance = Guidance.decide(config, currentAction, activeReminders, farBind, farBindArea, snapshot);
 	}
 
 	private NextAction nextAction(Observation obs, RotationStep step)
