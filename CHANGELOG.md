@@ -25,6 +25,7 @@ All notable changes to this plugin. Format: [Keep a Changelog](https://keepachan
 - CI on every push and PR, tag-driven GitHub Releases, a weekly build against RuneLite snapshots, Dependabot.
 - The version is read from `runelite-plugin.properties` only.
 - Logic modules take a per-tick `Observation` value instead of reading the RuneLite `Client` (ADR-0005); Step inference and Trip counting live in `Rotation` with a table of unit tests.
+- `Helper` decides once per tick what is drawn (`Guidance`: Next Action, Reminders, highlight, Path Display, Status Panel, Idle Tint); overlays read that value and no longer read config. `HelperAction` renamed `NextAction`.
 - `FragmentTracker` estimates the hidden Fragment stack from a `RawInventory` value read by `InventoryReader`; the estimate is unit-tested as a sequence of reads. Replaces `InventoryChecker`.
 - `Reminders` returns typed `Reminder` values from one `evaluate` call that takes the clock; all four kinds and the idle timer are unit-tested. Replaces `ReminderService`.
 - Tracked dev loop (`dev.sh`, `tools/dev.ps1`), glossary (`CONTEXT.md`), standards and ADRs under `docs/`.

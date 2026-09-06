@@ -1,9 +1,9 @@
 package com.vetle.arceuusrc.overlay;
 
 import com.vetle.arceuusrc.AgilityShortcut;
-import com.vetle.arceuusrc.HelperAction;
+import com.vetle.arceuusrc.Guidance;
+import com.vetle.arceuusrc.NextAction;
 import com.vetle.arceuusrc.Helper;
-import com.vetle.arceuusrc.ArceuusRcHelperConfig;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -31,30 +31,29 @@ public class PathMinimapOverlay extends Overlay
 	private static final Stroke PATH_LINE = new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 
 	private final Client client;
-	private final ArceuusRcHelperConfig config;
 	private final Helper helper;
 
 	@Inject
-	private PathMinimapOverlay(Client client, ArceuusRcHelperConfig config, Helper helper)
+	private PathMinimapOverlay(Client client, Helper helper)
 	{
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
 		setPriority(Overlay.PRIORITY_LOW);
 		this.client = client;
-		this.config = config;
 		this.helper = helper;
 	}
 
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (!config.enableHelper() || !config.pathDisplay().showsMinimap())
+		Guidance guidance = helper.getGuidance();
+		if (!guidance.isDrawMinimapPath())
 		{
 			return null;
 		}
 
-		HelperAction action = helper.getCurrentAction();
-		if (action == null || action.getPath() == null || action.getPath().size() < 2)
+		NextAction action = guidance.getNextAction();
+		if (action.getPath() == null || action.getPath().size() < 2)
 		{
 			return null;
 		}
