@@ -93,7 +93,7 @@ final class Pathfinder
 			return Collections.emptyList();
 		}
 
-		int[][] hops = sceneTransports(worldView, transports, flags, size);
+		int[][] hops = sceneTransports(worldView, transports, size);
 
 		boolean[][] seen = new boolean[size][size];
 		PriorityQueue<Node> open = new PriorityQueue<>(Comparator.comparingInt(n -> n.f));
@@ -152,7 +152,7 @@ final class Pathfinder
 			path.add(WorldPoint.fromScene(worldView, n.x, n.y, plane));
 		}
 		Collections.reverse(path);
-		return path;
+		return Collections.unmodifiableList(path);
 	}
 
 	/**
@@ -286,7 +286,7 @@ final class Pathfinder
 		open.add(new Node(nx, ny, g, g + heuristic(nx, ny, ex, ey, hops), cur));
 	}
 
-	private static int[][] sceneTransports(WorldView worldView, List<Transport> transports, int[][] flags, int size)
+	private static int[][] sceneTransports(WorldView worldView, List<Transport> transports, int size)
 	{
 		if (transports == null || transports.isEmpty())
 		{

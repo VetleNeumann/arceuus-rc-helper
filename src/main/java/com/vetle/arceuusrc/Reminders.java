@@ -201,7 +201,7 @@ public class Reminders
 			lastMoveAt = now;
 			return false;
 		}
-		return Duration.between(lastMoveAt, now).getSeconds() >= config.idleReminderSeconds();
+		return Duration.between(lastMoveAt, now).toSeconds() >= config.idleReminderSeconds();
 	}
 
 	private void syncBloodEssenceCharges(InventorySnapshot inv)
