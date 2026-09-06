@@ -32,6 +32,10 @@ public class Helper
 
 	private NextAction currentAction = NextAction.idle();
 
+	/** THROWAWAY (wayfinder #23): the Step the Rotation inferred on the last tick, for the measurement log. */
+	@Getter
+	private RotationStep currentStep = RotationStep.IDLE;
+
 	@Getter
 	private InventorySnapshot snapshot = InventorySnapshot.empty();
 
@@ -87,6 +91,7 @@ public class Helper
 			resolvedMode = obs.getRune();
 			snapshot = obs.getInventory();
 			RotationStep step = rotation.advance(obs);
+			currentStep = step;
 			if (config.enableHelper())
 			{
 				currentAction = nextAction(obs, step);

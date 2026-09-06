@@ -170,7 +170,7 @@ public class CameraCheckPrototype
 
 	// Landing Tile guesses (#23 measures the real ones). Model ids and orientations from
 	// docs/research/target-geometry.md; Blood Altar SW is the in-game tile, not the cache one.
-	static final List<Hop> BLOOD_HOPS = List.of(
+	public static final List<Hop> BLOOD_HOPS = List.of(
 		new Hop("Mine", new WorldPoint(1762, 3854, 0), 0,
 			new Target(new WorldPoint(1762, 3856, 0), 5, 30836, 3),
 			new Target(new WorldPoint(1762, 3844, 0), 5, 30836, 0)),

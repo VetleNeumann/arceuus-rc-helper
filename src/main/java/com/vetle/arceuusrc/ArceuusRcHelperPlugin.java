@@ -3,6 +3,7 @@ package com.vetle.arceuusrc;
 import com.vetle.arceuusrc.game.ClientObserver;
 import com.vetle.arceuusrc.game.SceneTracker;
 import com.vetle.arceuusrc.game.ShortestPathBridge;
+import com.vetle.arceuusrc.measure.MeasurementLogger;
 import com.google.inject.Provides;
 import com.vetle.arceuusrc.overlay.CameraCheckGhostPrototypeOverlay;
 import com.vetle.arceuusrc.overlay.CameraCheckPanelPrototypeOverlay;
@@ -24,6 +25,7 @@ import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.GroundObjectDespawned;
 import net.runelite.api.events.GroundObjectSpawned;
+import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WallObjectDespawned;
 import net.runelite.api.events.WallObjectSpawned;
@@ -89,6 +91,10 @@ public class ArceuusRcHelperPlugin extends Plugin
 	@Inject
 	private ClientObserver observer;
 
+	/** THROWAWAY (wayfinder #23): measurement log for the Sightline calibration session. */
+	@Inject
+	private MeasurementLogger measurementLogger;
+
 	@Override
 	protected void startUp()
 	{
@@ -144,18 +150,27 @@ public class ArceuusRcHelperPlugin extends Plugin
 	public void onGameTick(GameTick tick)
 	{
 		helper.update(observer.observe());
+		measurementLogger.onGameTick(tick);
+	}
+
+	@Subscribe
+	public void onMenuOptionClicked(MenuOptionClicked event)
+	{
+		measurementLogger.onMenuOptionClicked(event);
 	}
 
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned event)
 	{
 		sceneTracker.onSpawn(event.getGameObject());
+		measurementLogger.onGameObjectSpawned(event);
 	}
 
 	@Subscribe
 	public void onGameObjectDespawned(GameObjectDespawned event)
 	{
 		sceneTracker.onDespawn(event.getGameObject());
+		measurementLogger.onGameObjectDespawned(event);
 	}
 
 	@Subscribe
@@ -174,12 +189,14 @@ public class ArceuusRcHelperPlugin extends Plugin
 	public void onGroundObjectSpawned(GroundObjectSpawned event)
 	{
 		sceneTracker.onSpawn(event.getGroundObject());
+		measurementLogger.onGroundObjectSpawned(event);
 	}
 
 	@Subscribe
 	public void onGroundObjectDespawned(GroundObjectDespawned event)
 	{
 		sceneTracker.onDespawn(event.getGroundObject());
+		measurementLogger.onGroundObjectDespawned(event);
 	}
 
 	@Subscribe
@@ -214,6 +231,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
+		measurementLogger.onGameStateChanged(event);
 		if (event.getGameState() == GameState.LOADING)
 		{
 			sceneTracker.reset();
