@@ -1,5 +1,6 @@
 package com.vetle.arceuusrc;
 
+import com.vetle.arceuusrc.game.SceneTracker;
 import java.util.Arrays;
 import java.util.List;
 import net.runelite.api.coords.WorldPoint;

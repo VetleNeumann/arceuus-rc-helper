@@ -1,5 +1,8 @@
 package com.vetle.arceuusrc;
 
+import com.vetle.arceuusrc.game.InventoryChecker;
+import com.vetle.arceuusrc.game.SceneTracker;
+import com.vetle.arceuusrc.game.ShortestPathBridge;
 import java.awt.Color;
 import java.util.List;
 import javax.inject.Inject;

@@ -1,5 +1,6 @@
-package com.vetle.arceuusrc;
+package com.vetle.arceuusrc.game;
 
+import com.vetle.arceuusrc.InventorySnapshot;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
@@ -36,7 +37,7 @@ public class InventoryChecker
 	private int lastDarkBlocks = -1;
 
 	@Inject
-	InventoryChecker(Client client)
+	public InventoryChecker(Client client)
 	{
 		this.client = client;
 	}

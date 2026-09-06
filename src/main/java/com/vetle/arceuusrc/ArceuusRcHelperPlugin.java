@@ -1,5 +1,8 @@
 package com.vetle.arceuusrc;
 
+import com.vetle.arceuusrc.game.InventoryChecker;
+import com.vetle.arceuusrc.game.SceneTracker;
+import com.vetle.arceuusrc.game.ShortestPathBridge;
 import com.google.inject.Provides;
 import com.vetle.arceuusrc.overlay.IdleTintOverlay;
 import com.vetle.arceuusrc.overlay.NextClickOverlay;
