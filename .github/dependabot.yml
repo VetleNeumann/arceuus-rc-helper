@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      gradle:
+        patterns: ["*"]
+    ignore:
+      # RuneLite itself floats on latest.release on purpose (Plugin Hub convention).
+      - dependency-name: "net.runelite:*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
