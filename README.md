@@ -1,5 +1,7 @@
 # Arceuus RC Helper
 
+[![CI](https://github.com/VetleNeumann/zeah-rc-helper/actions/workflows/ci.yml/badge.svg)](https://github.com/VetleNeumann/zeah-rc-helper/actions/workflows/ci.yml)
+
 A click-here helper for Arceuus blood and soul runecrafting. It highlights what to click next, draws a path there, and keeps your inventory counts and gear reminders in one small panel.
 
 This plugin conflicts with [Easy Arceuus Runecrafting](https://github.com/poi56iop/easy-arceuus-runecrafting). Only one can be enabled at a time.
@@ -17,8 +19,6 @@ This plugin conflicts with [Easy Arceuus Runecrafting](https://github.com/poi56i
 - **Reminders** — the same panel tells you if you are missing a chisel, pickaxe, lantern, or blood essence, or if you have stood still too long.
 
 Bloods show in red and Souls in teal. Auto uses souls at 90 Runecraft, otherwise bloods.
-
-After an update, chat shows what changed the first time you log in.
 
 ## The rotation
 
@@ -65,15 +65,18 @@ Everything is on by default except the idle screen tint.
 
 ## Development
 
-Requires JDK 11+.
+Hard fork of [JamsRepos/zeah-rc-helper](https://github.com/JamsRepos/zeah-rc-helper); not on the Plugin Hub. Requires JDK 11.
 
 ```bash
-./gradlew test        # unit tests
-./gradlew shadowJar   # build plugin jar
-./gradlew run         # launch dev client
+./gradlew build   # compile, checkstyle, tests
+./dev.sh          # build and restart the dev client (see docs/DEV-LOOP.md)
 ```
 
-For Jagex accounts, follow [Using Jagex Accounts](https://github.com/runelite/runelite/wiki/Using-Jagex-Accounts).
+- `CONTEXT.md` — glossary of the domain terms used in code and docs
+- `docs/STANDARDS.md` — coding, testing, commit and release conventions
+- `docs/RUNELITE-RULES.md` — Plugin Hub restrictions this fork stays within
+- `docs/adr/` — decisions and why
+- `CHANGELOG.md` — release notes
 
 ## License
 
