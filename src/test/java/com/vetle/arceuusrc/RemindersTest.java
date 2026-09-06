@@ -7,10 +7,10 @@ import net.runelite.api.ChatMessageType;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.gameval.ItemID;
-import net.runelite.client.config.ConfigManager;
+import com.vetle.arceuusrc.game.ItemChargesStore;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import org.junit.Test;
 
 public class RemindersTest
@@ -20,7 +20,7 @@ public class RemindersTest
 	private static final WorldPoint NEXT_TILE = new WorldPoint(1763, 3854, 0);
 
 	private final StubConfig config = new StubConfig();
-	private final Reminders reminders = new Reminders(config, mock(ConfigManager.class));
+	private final Reminders reminders = new Reminders(config, new NoStoredCharges());
 
 	@Test
 	public void fullyEquippedPlayerGetsNoReminders()
@@ -165,10 +165,31 @@ public class RemindersTest
 	}
 
 	@Test
-	public void outsideArceuusNothingApplies()
+	public void outsideArceuusNothingAppliesButChargesAreKept()
 	{
+		reminders.onChatMessage(chat("Your blood essence has 500 charges remaining"));
 		Observation away = new Observation(false, RcMode.BLOOD, Position.UNKNOWN, InventorySnapshot.empty(), 99, false, true, 0, null);
 		assertEquals(List.of(), reminders.evaluate(away, T0));
+		assertEquals(Integer.valueOf(500), reminders.bloodEssenceCharges());
+	}
+
+	@Test
+	public void leavingArceuusRestartsTheIdleTimer()
+	{
+		Observation away = new Observation(false, RcMode.BLOOD, Position.UNKNOWN, InventorySnapshot.empty(), 99, false, true, 0, null);
+		reminders.evaluate(obs(ready(), RcMode.BLOOD, TILE, false, true), T0);
+		reminders.evaluate(away, T0.plusSeconds(10));
+		reminders.evaluate(obs(ready(), RcMode.BLOOD, TILE, false, true), T0.plusSeconds(20));
+		assertEquals(List.of(), texts(reminders.evaluate(obs(ready(), RcMode.BLOOD, TILE, false, true), T0.plusSeconds(30))));
+		assertEquals(List.of("Idle"), texts(reminders.evaluate(obs(ready(), RcMode.BLOOD, TILE, false, true), T0.plusSeconds(35))));
+	}
+
+	@Test
+	public void droppingTheEssenceForgetsItsCharges()
+	{
+		reminders.onChatMessage(chat("Your blood essence has 500 charges remaining"));
+		evaluate(gear(true, true, true, false, ItemID.ABYSSAL_LANTERN_MAGIC), RcMode.BLOOD);
+		assertNull(reminders.bloodEssenceCharges());
 	}
 
 	@Test
@@ -218,6 +239,21 @@ public class RemindersTest
 	private static ChatMessage chat(String text)
 	{
 		return new ChatMessage(null, ChatMessageType.GAMEMESSAGE, "", text, "", 0);
+	}
+
+	/** Item Charges plugin has nothing recorded. */
+	private static class NoStoredCharges extends ItemChargesStore
+	{
+		NoStoredCharges()
+		{
+			super(null);
+		}
+
+		@Override
+		public int bloodEssenceCharges()
+		{
+			return -1;
+		}
 	}
 
 	/** Config defaults, with the few gates the tests flip. */

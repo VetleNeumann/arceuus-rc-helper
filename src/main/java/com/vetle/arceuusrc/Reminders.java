@@ -10,14 +10,14 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
+import com.vetle.arceuusrc.game.ItemChargesStore;
 import net.runelite.api.gameval.ItemID;
-import net.runelite.client.config.ConfigManager;
 import net.runelite.client.util.Text;
 
 /**
  * Decides which Reminders apply to an Observation: Gear, Lantern, Essence and Idle, in that
  * order. Blood Essence charges are remembered between ticks from chat messages and the Item
- * Charges plugin; the idle timer is driven by the clock the caller passes in.
+ * Charges store; the idle timer is driven by the clock the caller passes in.
  */
 @Singleton
 public class Reminders
@@ -30,22 +30,19 @@ public class Reminders
 		Pattern.CASE_INSENSITIVE);
 	private static final String ESSENCE_ACTIVATE = "You activate the blood essence.";
 	private static final int MAX_BLOOD_ESSENCE_CHARGES = 1000;
-	/** Matches RuneLite Item Charges plugin RS-profile key. */
-	private static final String ITEM_CHARGE_GROUP = "itemCharge";
-	private static final String ITEM_CHARGE_BLOOD_ESSENCE = "bloodEssence";
 
 	private final ArceuusRcHelperConfig config;
-	private final ConfigManager configManager;
+	private final ItemChargesStore itemCharges;
 
 	private Integer bloodEssenceCharges;
 	private Instant lastMoveAt;
 	private WorldPoint lastTile;
 
 	@Inject
-	Reminders(ArceuusRcHelperConfig config, ConfigManager configManager)
+	Reminders(ArceuusRcHelperConfig config, ItemChargesStore itemCharges)
 	{
 		this.config = config;
-		this.configManager = configManager;
+		this.itemCharges = itemCharges;
 	}
 
 	public void reset()
@@ -107,7 +104,7 @@ public class Reminders
 			int used = Integer.parseInt(extract.group(1));
 			int current = bloodEssenceCharges != null
 				? bloodEssenceCharges
-				: readItemChargeCharges();
+				: itemCharges.bloodEssenceCharges();
 			if (current >= 0)
 			{
 				setBloodEssenceCharges(Math.max(0, current - used));
@@ -221,7 +218,7 @@ public class Reminders
 		{
 			return;
 		}
-		int stored = readItemChargeCharges();
+		int stored = itemCharges.bloodEssenceCharges();
 		if (stored >= 0)
 		{
 			bloodEssenceCharges = stored;
@@ -231,21 +228,5 @@ public class Reminders
 	private void setBloodEssenceCharges(int charges)
 	{
 		bloodEssenceCharges = Math.max(0, Math.min(MAX_BLOOD_ESSENCE_CHARGES, charges));
-	}
-
-	private int readItemChargeCharges()
-	{
-		try
-		{
-			Integer stored = configManager.getRSProfileConfiguration(
-				ITEM_CHARGE_GROUP,
-				ITEM_CHARGE_BLOOD_ESSENCE,
-				Integer.class);
-			return stored != null ? stored : -1;
-		}
-		catch (Exception ex)
-		{
-			return -1;
-		}
 	}
 }

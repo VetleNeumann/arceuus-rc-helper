@@ -8,7 +8,7 @@ package com.vetle.arceuusrc;
 public class Rotation
 {
 	/** Enough Fragments held that the next load of Dense Blocks goes straight to the altar. */
-	static final int FULL_FRAGMENTS = 100;
+	private static final int FULL_FRAGMENTS = 100;
 
 	private RotationStep lastStep = RotationStep.IDLE;
 	private int tripsCompleted;

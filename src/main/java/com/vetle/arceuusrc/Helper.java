@@ -142,24 +142,8 @@ public class Helper
 		{
 			return null;
 		}
-		switch (step)
-		{
-			case MINE_FIRST:
-			case MINE_SECOND:
-			case CHISEL_AND_RETURN:
-			case RETURN_TO_MINE:
-				return ArceuusRcArea.MINE_STAND;
-			case GO_DARK_FIRST:
-			case GO_DARK_SECOND:
-				return ArceuusRcArea.DARK_ALTAR;
-			case GO_ALTAR:
-			case CRAFT_FRAGMENTS:
-			case CRAFT_REMAINING:
-			case CHISEL_AT_ALTAR:
-				return craftAltar();
-			default:
-				return end;
-		}
+		WorldPoint stand = standTile(step);
+		return stand != null ? stand : end;
 	}
 
 	private TileObject destinationObject(RotationStep step, Observation obs)
@@ -202,10 +186,11 @@ public class Helper
 		{
 			return null;
 		}
-		return fallbackTile(step);
+		return standTile(step);
 	}
 
-	private WorldPoint fallbackTile(RotationStep step)
+	/** The walkable tile to head for on a Step, when no scene object is known for it. */
+	private WorldPoint standTile(RotationStep step)
 	{
 		switch (step)
 		{

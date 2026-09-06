@@ -8,6 +8,8 @@ import org.junit.Test;
 public class RotationTest
 {
 	private static final int SLOTS = 28;
+	/** Full Stack: Rotation's threshold for skipping the chisel Step. */
+	private static final int FULL_STACK = 100;
 	private static final WorldPoint TILE = new WorldPoint(1762, 3854, 0);
 
 	private static final Position AT_MINE = new Position(TILE, true, false, false);
@@ -80,7 +82,7 @@ public class RotationTest
 	@Test
 	public void fullStackPlusDarkBlocksGoToAltarWithoutChiselling()
 	{
-		assertEquals(RotationStep.GO_ALTAR, step(carrying(0, 5, Rotation.FULL_FRAGMENTS), ON_THE_WAY));
+		assertEquals(RotationStep.GO_ALTAR, step(carrying(0, 5, FULL_STACK), ON_THE_WAY));
 	}
 
 	@Test

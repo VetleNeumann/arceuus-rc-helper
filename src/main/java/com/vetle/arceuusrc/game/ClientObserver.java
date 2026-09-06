@@ -44,13 +44,13 @@ public class ClientObserver
 		WorldPoint tile = player == null ? null : player.getWorldLocation();
 		boolean inArceuus = ArceuusRcArea.isInArceuusRc(tile);
 		RcMode rune = RcMode.resolve(config.mode(), client.getRealSkillLevel(Skill.RUNECRAFT));
-		Position position = tile == null
-			? Position.UNKNOWN
-			: new Position(
+		Position position = inArceuus
+			? new Position(
 				tile,
 				sceneTracker.isAtMine(tile),
 				sceneTracker.isAtAltar(tile, rune),
-				sceneTracker.isNearAltar(tile, rune));
+				sceneTracker.isNearAltar(tile, rune))
+			: Position.UNKNOWN;
 		InventorySnapshot inventory = inArceuus ? inventoryChecker.scan() : InventorySnapshot.empty();
 		boolean animating = player != null && player.getAnimation() != -1;
 		boolean idlePose = player == null || player.getPoseAnimation() == player.getIdlePoseAnimation();
