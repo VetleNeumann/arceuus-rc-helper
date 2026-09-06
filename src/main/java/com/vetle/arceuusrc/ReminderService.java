@@ -9,8 +9,6 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Getter;
-import net.runelite.api.Client;
-import net.runelite.api.Player;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.gameval.ItemID;
@@ -32,7 +30,6 @@ public class ReminderService
 	private static final String ITEM_CHARGE_GROUP = "itemCharge";
 	private static final String ITEM_CHARGE_BLOOD_ESSENCE = "bloodEssence";
 
-	private final Client client;
 	private final ArceuusRcHelperConfig config;
 	private final ConfigManager configManager;
 
@@ -49,9 +46,8 @@ public class ReminderService
 	private WorldPoint lastTile;
 
 	@Inject
-	ReminderService(Client client, ArceuusRcHelperConfig config, ConfigManager configManager)
+	ReminderService(ArceuusRcHelperConfig config, ConfigManager configManager)
 	{
-		this.client = client;
 		this.config = config;
 		this.configManager = configManager;
 	}
@@ -97,22 +93,22 @@ public class ReminderService
 		}
 	}
 
-	public void update(InventorySnapshot inv, RcMode mode, boolean inArea)
+	public void update(Observation obs)
 	{
 		warnings.clear();
 		idle = false;
 
-		if (!inArea || inv == null)
+		if (!obs.isInArceuus())
 		{
 			return;
 		}
 
-		updateIdle();
-		syncBloodEssenceCharges(inv);
+		updateIdle(obs);
+		syncBloodEssenceCharges(obs.getInventory());
 
 		if (config.gearReminder())
 		{
-			addGearWarnings(inv, mode);
+			addGearWarnings(obs.getInventory(), obs.getRune());
 		}
 
 	}
@@ -219,24 +215,17 @@ public class ReminderService
 		}
 	}
 
-	private void updateIdle()
+	private void updateIdle(Observation obs)
 	{
-		if (client.getLocalPlayer() == null)
+		WorldPoint now = obs.getPosition().getTile();
+		if (now == null)
 		{
 			return;
 		}
 
 		// Standing still while mining or chiseling is not idle.
-		if (isBusy())
-		{
-			lastTile = client.getLocalPlayer().getWorldLocation();
-			lastMoveAt = Instant.now();
-			idle = false;
-			return;
-		}
-
-		WorldPoint now = client.getLocalPlayer().getWorldLocation();
-		if (lastTile == null || now == null || lastTile.distanceTo(now) > 0)
+		boolean busy = obs.isAnimating() || !obs.isIdlePose();
+		if (busy || lastTile == null || lastTile.distanceTo(now) > 0)
 		{
 			lastTile = now;
 			lastMoveAt = Instant.now();
@@ -244,16 +233,5 @@ public class ReminderService
 			return;
 		}
 		idle = Duration.between(lastMoveAt, Instant.now()).getSeconds() >= config.idleReminderSeconds();
-	}
-
-	private boolean isBusy()
-	{
-		Player player = client.getLocalPlayer();
-		if (player == null)
-		{
-			return false;
-		}
-		return player.getAnimation() != -1
-			|| player.getPoseAnimation() != player.getIdlePoseAnimation();
 	}
 }
