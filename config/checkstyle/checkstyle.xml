@@ -44,6 +44,11 @@
 			<property name="allowStaticMemberImports" value="true"/>
 		</module>
 
+		<!-- The Observation seam (docs/adr/0005-game-reads-cross-one-seam.md) -->
+		<module name="ImportControl">
+			<property name="file" value="${config_loc}/import-control.xml"/>
+		</module>
+
 		<!-- Plugin Hub forbidden APIs (docs/RUNELITE-RULES.md) -->
 		<module name="IllegalImport">
 			<property name="illegalPkgs" value="java.lang.reflect, java.net.http, sun, com.sun, org.apache.http"/>
