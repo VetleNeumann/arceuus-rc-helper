@@ -10,7 +10,9 @@ import net.runelite.client.util.Text;
  * Estimates the Fragment count the game hides. The item container reports the stack as 1, so
  * the tracker keeps the last estimate and corrects it from what it can see: a visible quantity
  * on the widget, Dark Blocks disappearing as they are chiselled, a full second inventory, and
- * the "roughly equivalent to N pieces of essence" chat line. Stateful; reset on login.
+ * the "roughly equivalent to N pieces of essence" chat line. Chiselling is deterministic, so the
+ * estimate is known whenever the stack was watched from empty, counted, or shown; it is a guess
+ * from the moment a stack turns up unwatched until the player uses Count. Stateful; reset on login.
  */
 @Singleton
 public class FragmentTracker
@@ -26,11 +28,13 @@ public class FragmentTracker
 		Pattern.CASE_INSENSITIVE);
 
 	private int trackedFragments;
+	private boolean known;
 	private int lastDarkBlocks = -1;
 
 	public void reset()
 	{
 		trackedFragments = 0;
+		known = false;
 		lastDarkBlocks = -1;
 	}
 
@@ -40,6 +44,7 @@ public class FragmentTracker
 		if (COUNT_ONE.matcher(message).find())
 		{
 			trackedFragments = 1;
+			known = true;
 			return;
 		}
 		Matcher many = COUNT_MANY.matcher(message);
@@ -48,6 +53,7 @@ public class FragmentTracker
 			try
 			{
 				trackedFragments = Math.min(MAX_FRAGMENTS, Integer.parseInt(many.group(1)));
+				known = true;
 			}
 			catch (NumberFormatException ignored)
 			{
@@ -69,6 +75,7 @@ public class FragmentTracker
 			raw.getDenseBlocks(),
 			raw.getDarkBlocks(),
 			fragments,
+			known,
 			raw.getEmptySlots(),
 			raw.isHasChisel(),
 			raw.isHasPickaxe(),
@@ -84,6 +91,7 @@ public class FragmentTracker
 		if (!hasFragmentItem)
 		{
 			trackedFragments = 0;
+			known = true;
 			lastDarkBlocks = dark;
 			return 0;
 		}
@@ -92,6 +100,7 @@ public class FragmentTracker
 		if (visible > 1)
 		{
 			trackedFragments = Math.min(MAX_FRAGMENTS, visible);
+			known = true;
 		}
 		else if (lastDarkBlocks >= 0 && dark < lastDarkBlocks)
 		{
@@ -101,10 +110,12 @@ public class FragmentTracker
 		{
 			// Second inventory: fragment stack + full bag of dark. Quantity is hidden as 1.
 			trackedFragments = TYPICAL_FULL_STACK;
+			known = false;
 		}
 		else if (trackedFragments <= 0)
 		{
 			trackedFragments = Math.max(1, visible);
+			known = false;
 		}
 
 		lastDarkBlocks = dark;

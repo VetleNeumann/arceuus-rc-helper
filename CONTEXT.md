@@ -44,7 +44,7 @@ The stackable item produced by chiselling a Dark Block. Crafted into runes at th
 _Avoid_: dark essence fragments, frags, essence
 
 **Fragment Estimate**:
-The plugin's figure for the hidden Fragment stack size. Exact whenever the plugin saw the stack grow from nothing or the player used Count; a guess only when the plugin first sees a stack it did not watch being made. Drawn on the Fragment stack.
+The plugin's figure for the hidden Fragment stack size. Known whenever the plugin saw the stack grow from nothing or the player used Count; Unknown from the moment the plugin first sees a stack it did not watch being made until the player uses Count, drawn as a question mark. Drawn on the Fragment stack.
 _Avoid_: fragment count (implies the game shows it)
 
 **Full Stack**:

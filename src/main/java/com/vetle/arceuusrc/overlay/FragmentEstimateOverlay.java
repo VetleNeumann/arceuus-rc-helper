@@ -15,13 +15,14 @@ import net.runelite.client.ui.overlay.components.TextComponent;
 /**
  * Draws the Fragment Estimate on the Fragment stack in the inventory, which the game leaves
  * unnumbered. Yellow while the stack is short of a Full Stack, cyan once it is one, the same
- * colours the core Runecraft plugin gives an essence pouch. Reads the Guidance decided this tick
- * and draws; nothing is decided here.
+ * colours the core Runecraft plugin gives an essence pouch; a question mark while the number is a
+ * guess. Reads the Guidance decided this tick and draws; nothing is decided here.
  */
 public class FragmentEstimateOverlay extends WidgetItemOverlay
 {
 	private static final Color FULL_STACK = Color.CYAN;
 	private static final Color SHORT = Color.YELLOW;
+	private static final String UNKNOWN = "?";
 	/** Baseline offset from the icon's top-left, matching the core Runecraft pouch overlay. */
 	private static final int TEXT_OFFSET_Y = 15;
 
@@ -53,8 +54,8 @@ public class FragmentEstimateOverlay extends WidgetItemOverlay
 			return;
 		}
 		graphics.setFont(FontManager.getRunescapeSmallFont());
-		text.setText(String.valueOf(estimate.getCount()));
-		text.setColor(estimate.isFullStack() ? FULL_STACK : SHORT);
+		text.setText(estimate.isKnown() ? String.valueOf(estimate.getCount()) : UNKNOWN);
+		text.setColor(estimate.isKnown() && estimate.isFullStack() ? FULL_STACK : SHORT);
 		text.setPosition(new Point(location.getX(), location.getY() + TEXT_OFFSET_Y));
 		text.render(graphics);
 	}

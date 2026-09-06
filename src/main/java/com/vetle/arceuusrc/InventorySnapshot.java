@@ -7,12 +7,14 @@ public class InventorySnapshot
 {
 	private static final int FULL_STACK = 100;
 	private static final InventorySnapshot EMPTY =
-		new InventorySnapshot(0, 0, 0, 28, false, false, false, false, false, false, -1);
+		new InventorySnapshot(0, 0, 0, true, 28, false, false, false, false, false, false, -1);
 
 	int denseBlocks;
 	int darkBlocks;
 	/** The Fragment Estimate. */
 	int fragments;
+	/** False while the Fragment Estimate is a guess: the plugin did not watch the stack being made. */
+	boolean fragmentsKnown;
 	int emptySlots;
 	boolean hasChisel;
 	boolean hasPickaxe;

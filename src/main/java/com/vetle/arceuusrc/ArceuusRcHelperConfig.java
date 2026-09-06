@@ -116,7 +116,8 @@ public interface ArceuusRcHelperConfig extends Config
 		keyName = "showFragmentEstimate",
 		name = "Fragment estimate",
 		description = "Draw the estimated stack size on the fragments in your inventory: "
-			+ "yellow while short of a full stack, cyan once it is full",
+			+ "yellow while short of a full stack, cyan once it is full, "
+			+ "a question mark until you use Count on a stack the plugin did not watch being made",
 		section = helperSection,
 		position = 7
 	)

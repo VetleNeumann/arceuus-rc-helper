@@ -107,14 +107,16 @@ public class GuidanceTest
 	@Test
 	public void fragmentEstimateFollowsTheSnapshotItsToggleAndTheHelper()
 	{
-		InventorySnapshot shortStack = carrying(13);
+		InventorySnapshot shortStack = carrying(13, true);
 		FragmentEstimate shown = decide(shortStack).getFragmentEstimate();
 		assertTrue(shown.isShown());
 		assertEquals(13, shown.getCount());
 		assertFalse(shown.isFullStack());
+		assertTrue(shown.isKnown());
 
-		assertTrue(decide(carrying(108)).getFragmentEstimate().isFullStack());
-		assertFalse(decide(carrying(0)).getFragmentEstimate().isShown());
+		assertTrue(decide(carrying(108, false)).getFragmentEstimate().isFullStack());
+		assertFalse(decide(carrying(108, false)).getFragmentEstimate().isKnown());
+		assertFalse(decide(carrying(0, true)).getFragmentEstimate().isShown());
 
 		config.showFragmentEstimate = false;
 		assertFalse(decide(shortStack).getFragmentEstimate().isShown());
@@ -141,9 +143,9 @@ public class GuidanceTest
 		return Guidance.decide(config, mining(), List.of(), FarBind.State.NONE, List.of(), inv);
 	}
 
-	private static InventorySnapshot carrying(int fragments)
+	private static InventorySnapshot carrying(int fragments, boolean known)
 	{
-		return new InventorySnapshot(0, 0, fragments, 27, true, true, false, false, true, false, -1);
+		return new InventorySnapshot(0, 0, fragments, known, 27, true, true, false, false, true, false, -1);
 	}
 
 	private static NextAction mining()

@@ -3,6 +3,8 @@ package com.vetle.arceuusrc;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.events.ChatMessage;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
@@ -111,12 +113,57 @@ public class FragmentTrackerTest
 	{
 		RawInventory raw = new RawInventory(3, 4, true, 1, 1, 20, false, true, true, false, true, false, 42);
 		InventorySnapshot snap = tracker.observe(raw);
-		assertEquals(new InventorySnapshot(3, 4, 1, 20, false, true, true, false, true, false, 42), snap);
+		assertEquals(new InventorySnapshot(3, 4, 1, false, 20, false, true, true, false, true, false, 42), snap);
+	}
+
+	@Test
+	public void stackWatchedFromEmptyIsKnown()
+	{
+		assertTrue(known(carrying(0, 27, false, 0, 0)));
+		assertEquals(4, fragments(carrying(0, 26, true, 1, 1)));
+		assertTrue(known(carrying(0, 26, true, 1, 1)));
+		assertEquals(8, fragments(carrying(0, 25, true, 1, 1)));
+		assertTrue(known(carrying(0, 25, true, 1, 1)));
+	}
+
+	@Test
+	public void stackFirstSeenAfterResetIsUnknownUntilCounted()
+	{
+		assertFalse(known(carrying(0, 5, true, 1, 1)));
+		assertFalse(known(carrying(0, 3, true, 1, 1)));
+		tracker.onChatMessage(chat("This stack of fragments is roughly equivalent to 27 pieces of essence."));
+		assertTrue(known(carrying(0, 3, true, 1, 1)));
+		assertTrue(known(carrying(0, 1, true, 1, 1)));
+	}
+
+	@Test
+	public void assumedFullStackIsUnknown()
+	{
+		assertEquals(108, fragments(carrying(0, 27, true, 1, 1)));
+		assertFalse(known(carrying(0, 27, true, 1, 1)));
+	}
+
+	@Test
+	public void visibleQuantityIsKnown()
+	{
+		assertTrue(known(carrying(0, 0, true, 37, 0)));
+	}
+
+	@Test
+	public void pickedUpStackIsUnknown()
+	{
+		known(carrying(0, 5, false, 0, 0));
+		assertFalse(known(carrying(0, 5, true, 1, 1)));
 	}
 
 	private int fragments(RawInventory raw)
 	{
 		return tracker.observe(raw).getFragments();
+	}
+
+	private boolean known(RawInventory raw)
+	{
+		return tracker.observe(raw).isFragmentsKnown();
 	}
 
 	private static ChatMessage chat(String text)

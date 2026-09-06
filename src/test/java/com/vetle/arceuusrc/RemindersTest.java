@@ -103,7 +103,7 @@ public class RemindersTest
 	@Test
 	public void inactiveEssenceAsksToActivate()
 	{
-		InventorySnapshot inv = new InventorySnapshot(0, 0, 0, 28, true, true, true, false, true, false, ItemID.ABYSSAL_LANTERN_MAGIC);
+		InventorySnapshot inv = new InventorySnapshot(0, 0, 0, true, 28, true, true, true, false, true, false, ItemID.ABYSSAL_LANTERN_MAGIC);
 		assertEquals(List.of("Activate your blood essence"), texts(evaluate(inv, RcMode.BLOOD)));
 	}
 
@@ -226,12 +226,12 @@ public class RemindersTest
 
 	private static InventorySnapshot gear(boolean chisel, boolean pickaxe, boolean lanternEquipped, boolean lanternInBag, int lanternId)
 	{
-		return new InventorySnapshot(0, 0, 0, 28, chisel, pickaxe, false, false, lanternEquipped, lanternInBag, lanternId);
+		return new InventorySnapshot(0, 0, 0, true, 28, chisel, pickaxe, false, false, lanternEquipped, lanternInBag, lanternId);
 	}
 
 	private static InventorySnapshot withActiveEssence(InventorySnapshot inv)
 	{
-		return new InventorySnapshot(inv.getDenseBlocks(), inv.getDarkBlocks(), inv.getFragments(), inv.getEmptySlots(),
+		return new InventorySnapshot(inv.getDenseBlocks(), inv.getDarkBlocks(), inv.getFragments(), inv.isFragmentsKnown(), inv.getEmptySlots(),
 			inv.isHasChisel(), inv.isHasPickaxe(), false, true,
 			inv.isLanternEquipped(), inv.isLanternInInventory(), inv.getLanternItemId());
 	}
