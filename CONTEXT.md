@@ -11,7 +11,7 @@ The fixed sequence of Steps that turns two loads of Dense Blocks into runes: min
 _Avoid_: cycle, run, loop (when meaning the sequence)
 
 **Step**:
-The player's current position in the Rotation, inferred each tick from inventory contents and location rather than tracked as state. Also includes two positions outside the Rotation: returning to the Mine, and idle.
+The player's current position in the Rotation, inferred each tick from inventory contents and location rather than tracked as state; the previous Step is the only memory, kept to tell look-alike inventories apart (the second Batch, the tail of a chisel run). Also includes two positions outside the Rotation: returning to the Mine, and idle.
 _Avoid_: state, phase, stage
 
 **Trip**:

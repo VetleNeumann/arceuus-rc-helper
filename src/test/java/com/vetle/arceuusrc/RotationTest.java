@@ -68,9 +68,50 @@ public class RotationTest
 	}
 
 	@Test
-	public void fragmentsPlusDarkBlocksWithFullInventoryGoToAltar()
+	public void firstChiselOfAFullLoadKeepsChiselling()
 	{
-		assertEquals(RotationStep.GO_ALTAR, step(carrying(0, SLOTS - 1, 40), ON_THE_WAY));
+		// 27 Dark then 26 Dark plus a stack of 4: the inventory stays full, the stack is far from Full.
+		step(carrying(0, SLOTS, 0), ON_THE_WAY);
+		assertEquals(RotationStep.CHISEL_AND_RETURN, step(carrying(0, SLOTS - 1, 4), ON_THE_WAY));
+	}
+
+	@Test
+	public void lastBlocksOfAFullLoadKeepChisellingOnceTheStackIsFull()
+	{
+		// 4 Fragments a block: the stack is Full after 25 of 27, with Dark Blocks still to chisel.
+		step(carrying(0, SLOTS, 0), ON_THE_WAY);
+		step(carrying(0, 2, FULL_STACK), ON_THE_WAY);
+		assertEquals(RotationStep.CHISEL_AND_RETURN, step(carrying(0, 1, FULL_STACK + 4), ON_THE_WAY));
+	}
+
+	@Test
+	public void fullStackWithNoDarkBlocksLeftReturnsToMine()
+	{
+		step(carrying(0, SLOTS, 0), ON_THE_WAY);
+		step(carrying(0, 1, FULL_STACK), ON_THE_WAY);
+		assertEquals(RotationStep.RETURN_TO_MINE, step(carrying(0, 0, FULL_STACK + 4), ON_THE_WAY));
+	}
+
+	@Test
+	public void secondLoadWithFullStackGoesToAltar()
+	{
+		step(carrying(SLOTS - 1, 0, FULL_STACK + 4), AT_MINE);
+		assertEquals(RotationStep.GO_ALTAR, step(carrying(0, SLOTS - 1, FULL_STACK + 4), ON_THE_WAY));
+	}
+
+	@Test
+	public void secondLoadWithAShortEstimateStillGoesToAltar()
+	{
+		// The estimate can fall short of Full after a login mid-Trip; a full bag of Dark is proof enough.
+		step(carrying(SLOTS - 1, 0, 80), AT_MINE);
+		assertEquals(RotationStep.GO_ALTAR, step(carrying(0, SLOTS - 1, 80), ON_THE_WAY));
+	}
+
+	@Test
+	public void chisellingNearTheAltarGoesToAltar()
+	{
+		step(carrying(0, SLOTS, 0), ON_THE_WAY);
+		assertEquals(RotationStep.GO_ALTAR, step(carrying(0, 3, FULL_STACK), NEAR_ALTAR));
 	}
 
 	@Test

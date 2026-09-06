@@ -2,8 +2,9 @@ package com.vetle.arceuusrc;
 
 /**
  * Infers the player's Step in the Rotation from an Observation and counts Trips. Pure logic:
- * no injection, no client, only the previous Step as memory so a Trip can be recognised when
- * the Step returns to the first mining Step.
+ * no injection, no client, only the previous Step as memory: it recognises a Trip when the
+ * Step returns to the first mining Step, and tells look-alike inventories apart (the second
+ * Batch at the altar, a chisel run whose stack has grown Full before the last Dark Block).
  */
 public class Rotation
 {
@@ -39,6 +40,7 @@ public class Rotation
 		boolean hasDense = inv.getDenseBlocks() > 0;
 		boolean inventoryFull = inv.getEmptySlots() == 0;
 		boolean fullStack = inv.isFullStack();
+		boolean chiselling = lastStep == RotationStep.CHISEL_AND_RETURN;
 
 		if (position.isAtAltar())
 		{
@@ -53,7 +55,9 @@ public class Rotation
 			return RotationStep.RETURN_TO_MINE;
 		}
 
-		if (hasFrags && hasDark && (inventoryFull || fullStack || position.isNearAltar()))
+		// A chisel run looks like the second load once the stack is Full (or, after the first
+		// chisel, while the inventory is still full); only the previous Step tells them apart.
+		if (hasFrags && hasDark && (position.isNearAltar() || (!chiselling && (inventoryFull || fullStack))))
 		{
 			return RotationStep.GO_ALTAR;
 		}
@@ -61,7 +65,7 @@ public class Rotation
 		{
 			return hasFrags ? RotationStep.GO_DARK_SECOND : RotationStep.GO_DARK_FIRST;
 		}
-		if (hasDark && !fullStack)
+		if (hasDark && (chiselling || !fullStack))
 		{
 			return RotationStep.CHISEL_AND_RETURN;
 		}

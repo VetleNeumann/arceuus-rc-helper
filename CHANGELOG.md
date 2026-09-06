@@ -17,6 +17,7 @@ All notable changes to this plugin. Format: [Keep a Changelog](https://keepachan
 
 ### Fixed
 
+- Chiselling the first load no longer flips the Next Action to the altar: neither after the first Dark Block (the inventory is still full) nor after the twenty-fifth (the Fragment Estimate reaches a Full Stack with a block or two left). The Rotation remembers that a chisel run is under way until the Dark Blocks are gone or the altar is near.
 - The second Batch at the crafting altar shows "click the altar again for the second batch" instead of repeating the first-batch instruction. The Step after chiselling at the altar was never inferred, so a Trip only counted when the player walked back with an empty inventory.
 
 ### Removed
