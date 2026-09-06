@@ -5,11 +5,13 @@ import lombok.Value;
 @Value
 public class InventorySnapshot
 {
+	private static final int FULL_STACK = 100;
 	private static final InventorySnapshot EMPTY =
 		new InventorySnapshot(0, 0, 0, 28, false, false, false, false, false, false, -1);
 
 	int denseBlocks;
 	int darkBlocks;
+	/** The Fragment Estimate. */
 	int fragments;
 	int emptySlots;
 	boolean hasChisel;
@@ -24,5 +26,11 @@ public class InventorySnapshot
 	public static InventorySnapshot empty()
 	{
 		return EMPTY;
+	}
+
+	/** Full Stack: enough Fragments held that the next load of Dense Blocks goes straight to the altar. */
+	public boolean isFullStack()
+	{
+		return fragments >= FULL_STACK;
 	}
 }

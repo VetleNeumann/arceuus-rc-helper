@@ -43,6 +43,10 @@ _Avoid_: dark essence, dark
 The stackable item produced by chiselling a Dark Block. Crafted into runes at the Blood or Soul Altar. The game hides the stack size, so the plugin estimates it.
 _Avoid_: dark essence fragments, frags, essence
 
+**Fragment Estimate**:
+The plugin's figure for the hidden Fragment stack size. Exact whenever the plugin saw the stack grow from nothing or the player used Count; a guess only when the plugin first sees a stack it did not watch being made. Drawn on the Fragment stack.
+_Avoid_: fragment count (implies the game shows it)
+
 **Full Stack**:
 Enough Fragments held that the next load of Dense Blocks can be carried straight to the altar instead of being chiselled first.
 
@@ -122,6 +126,28 @@ Where the Path is drawn: floor, minimap, both, or nowhere.
 **Status Panel**:
 The on-screen panel showing the current Step, item counts, Trips, and active Reminders.
 _Avoid_: overlay panel, HUD
+
+### Camera
+
+**Camera Pose**:
+The player's yaw, pitch and zoom, set once before a Rotation and left alone. The camera's world position follows the player, so the Pose is what stays fixed.
+_Avoid_: camera settings, camera angle, camera position
+
+**Sightline**:
+The verdict for one Next Action target seen from one tile under one Camera Pose: Clear (clickable as is), Obstructed (partly covered, still clickable) or Hidden (the player must move the camera to click it).
+_Avoid_: visibility, on-screen, coverage
+
+**Hop**:
+One click on a scene object in the Rotation, judged from the Landing Tile of the click before it. Walks to a ground tile are not Hops: the minimap always offers them. A Hop with alternative targets (the two Dense Runestones) takes the best target's Sightline.
+_Avoid_: transition, leg, click (bare)
+
+**Landing Tile**:
+The tile the player stands on once a Hop's click has resolved. One fixed tile per Hop, measured in game.
+_Avoid_: end tile, arrival tile, next position
+
+**Camera Check**:
+The setup view: every Hop's Sightline listed on the Status Panel with its cause, and the target's predicted place on screen drawn, so the player can adjust the Camera Pose before a Rotation. Off during play, when only a one-line summary shows.
+_Avoid_: camera mode, setup mode, calibration
 
 ### Reading the game
 
