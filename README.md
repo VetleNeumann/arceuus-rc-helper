@@ -61,6 +61,8 @@ Everything is on by default except the idle screen tint.
 | Idle reminder | How long you can stand still before a warning |
 | Idle screen tint | Optional faint tint when idle |
 
+The idle reminder never sends a RuneLite notification: no sound, no tray popup, no taskbar flash. Its only output is the panel warning and the optional tint. If RuneLite flashes the taskbar or plays a sound while you are mining or chiseling, that comes from the built-in Idle Notifier plugin. Its "High energy threshold" alert (default 100) fires every time run energy climbs back to full while you stand still, which happens once per trip at the runestone and again at the altar. Set that threshold to 0 to keep only the real idle alerts.
+
 ---
 
 ## Development
@@ -77,6 +79,7 @@ Hard fork of [JamsRepos/zeah-rc-helper](https://github.com/JamsRepos/zeah-rc-hel
 - `docs/RUNELITE-RULES.md` — Plugin Hub restrictions this fork stays within
 - `docs/adr/` — decisions and why
 - `CHANGELOG.md` — release notes
+- `docs/KNOWN-ISSUES.md` — open bugs seen in the dev client (issues are disabled on GitHub)
 
 ## License
 
