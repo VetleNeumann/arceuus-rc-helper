@@ -14,13 +14,14 @@ import net.runelite.client.ui.overlay.components.TextComponent;
 
 /**
  * Draws the Fragment Estimate on the Fragment stack in the inventory, which the game leaves
- * unnumbered. Cyan when the game confirmed the count, yellow when the plugin inferred it. Reads
- * the Guidance decided this tick and draws; nothing is decided here.
+ * unnumbered. Yellow while the stack is short of a Full Stack, cyan once it is one, the same
+ * colours the core Runecraft plugin gives an essence pouch. Reads the Guidance decided this tick
+ * and draws; nothing is decided here.
  */
 public class FragmentEstimateOverlay extends WidgetItemOverlay
 {
-	private static final Color CONFIRMED = Color.CYAN;
-	private static final Color INFERRED = Color.YELLOW;
+	private static final Color FULL_STACK = Color.CYAN;
+	private static final Color SHORT = Color.YELLOW;
 	/** Baseline offset from the icon's top-left, matching the core Runecraft pouch overlay. */
 	private static final int TEXT_OFFSET_Y = 15;
 
@@ -53,7 +54,7 @@ public class FragmentEstimateOverlay extends WidgetItemOverlay
 		}
 		graphics.setFont(FontManager.getRunescapeSmallFont());
 		text.setText(String.valueOf(estimate.getCount()));
-		text.setColor(estimate.isConfirmed() ? CONFIRMED : INFERRED);
+		text.setColor(estimate.isFullStack() ? FULL_STACK : SHORT);
 		text.setPosition(new Point(location.getX(), location.getY() + TEXT_OFFSET_Y));
 		text.render(graphics);
 	}

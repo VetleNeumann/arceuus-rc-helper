@@ -7,9 +7,6 @@ package com.vetle.arceuusrc;
  */
 public class Rotation
 {
-	/** Enough Fragments held that the next load of Dense Blocks goes straight to the altar. */
-	private static final int FULL_FRAGMENTS = 100;
-
 	private RotationStep lastStep = RotationStep.IDLE;
 	private int tripsCompleted;
 
@@ -41,7 +38,7 @@ public class Rotation
 		boolean hasDark = inv.getDarkBlocks() > 0;
 		boolean hasDense = inv.getDenseBlocks() > 0;
 		boolean inventoryFull = inv.getEmptySlots() == 0;
-		boolean fullStack = inv.getFragments() >= FULL_FRAGMENTS;
+		boolean fullStack = inv.isFullStack();
 
 		if (position.isAtAltar())
 		{

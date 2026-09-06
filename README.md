@@ -17,7 +17,7 @@ This plugin conflicts with [Easy Arceuus Runecrafting](https://github.com/poi56i
   - **Trips** — finished runs this session
   - **Essence** — blood essence status (bloods only)
   - **Far Bind** — whether the Blood Altar can be clicked from where you stand (bloods only). After the second Dark Altar visit, step onto the marked tiles south of it and click the altar once; your character walks the rest. The path to the Dark Altar already passes that spot so the altar stays loaded.
-- **Fragment estimate** — the game never numbers the fragment stack, so the plugin draws its estimate on the stack in your inventory: cyan once the game has confirmed the count (a visible quantity, or the "roughly equivalent to N pieces" check message), yellow while the plugin has only worked it out from chiselling.
+- **Fragment estimate** — the game never numbers the fragment stack, so the plugin draws its own count on the stack in your inventory: yellow while short of a full stack, cyan once it is full, like the essence pouch overlay. Chiselling is deterministic (4 fragments per block), so the count is exact whenever the plugin watched the stack being made; after logging in mid-trip use Count on the stack to sync it.
 - **Reminders** — the same panel tells you if you are missing a chisel, pickaxe, lantern, or blood essence, or if you have stood still too long.
 
 Bloods show in red and Souls in teal. Auto uses souls at 90 Runecraft, otherwise bloods.
@@ -57,7 +57,7 @@ Everything is on by default except the idle screen tint.
 | Path source | Plugin lines, or hand the destination to the [Shortest Path](https://runelite.net/plugin-hub/show/shortest-path) plugin coloured by the current step |
 | Show status panel | Step, counts, and reminders |
 | Far Bind | Bloods only: say when the Blood Altar can be clicked from where you stand, and mark the tiles to step to when you are just outside that range |
-| Fragment estimate | Draw the estimated stack size on the fragments in your inventory: cyan when confirmed, yellow when inferred |
+| Fragment estimate | Draw the estimated stack size on the fragments in your inventory: yellow while short of a full stack, cyan once it is full |
 | Gear reminders | Warn if chisel, pickaxe, or lantern is missing |
 | Check lantern logs | Warn if the lantern is unlit or using logs that do not help this method |
 | Blood essence reminder | Warn to bring / activate essence, and when charges are low (bloods only) |

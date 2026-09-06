@@ -185,6 +185,6 @@ public class RotationTest
 	private static InventorySnapshot carrying(int dense, int dark, int fragments)
 	{
 		int used = dense + dark + (fragments > 0 ? 1 : 0);
-		return new InventorySnapshot(dense, dark, fragments, false, SLOTS - used, true, true, false, false, true, false, -1);
+		return new InventorySnapshot(dense, dark, fragments, SLOTS - used, true, true, false, false, true, false, -1);
 	}
 }

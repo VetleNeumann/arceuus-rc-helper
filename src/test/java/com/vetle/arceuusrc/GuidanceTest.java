@@ -107,21 +107,21 @@ public class GuidanceTest
 	@Test
 	public void fragmentEstimateFollowsTheSnapshotItsToggleAndTheHelper()
 	{
-		InventorySnapshot inferred = carrying(13, false);
-		FragmentEstimate shown = decide(inferred).getFragmentEstimate();
+		InventorySnapshot shortStack = carrying(13);
+		FragmentEstimate shown = decide(shortStack).getFragmentEstimate();
 		assertTrue(shown.isShown());
 		assertEquals(13, shown.getCount());
-		assertFalse(shown.isConfirmed());
+		assertFalse(shown.isFullStack());
 
-		assertTrue(decide(carrying(27, true)).getFragmentEstimate().isConfirmed());
-		assertFalse(decide(carrying(0, false)).getFragmentEstimate().isShown());
+		assertTrue(decide(carrying(108)).getFragmentEstimate().isFullStack());
+		assertFalse(decide(carrying(0)).getFragmentEstimate().isShown());
 
 		config.showFragmentEstimate = false;
-		assertFalse(decide(inferred).getFragmentEstimate().isShown());
+		assertFalse(decide(shortStack).getFragmentEstimate().isShown());
 
 		config.showFragmentEstimate = true;
 		config.enableHelper = false;
-		assertFalse(decide(inferred).getFragmentEstimate().isShown());
+		assertFalse(decide(shortStack).getFragmentEstimate().isShown());
 	}
 
 	@Test
@@ -141,9 +141,9 @@ public class GuidanceTest
 		return Guidance.decide(config, mining(), List.of(), FarBind.State.NONE, List.of(), inv);
 	}
 
-	private static InventorySnapshot carrying(int fragments, boolean confirmed)
+	private static InventorySnapshot carrying(int fragments)
 	{
-		return new InventorySnapshot(0, 0, fragments, confirmed, 27, true, true, false, false, true, false, -1);
+		return new InventorySnapshot(0, 0, fragments, 27, true, true, false, false, true, false, -1);
 	}
 
 	private static NextAction mining()
