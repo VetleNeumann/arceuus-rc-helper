@@ -27,7 +27,7 @@ public class Helper
 	private final Rotation rotation = new Rotation();
 
 	@Getter
-	private HelperAction currentAction = HelperAction.idle();
+	private NextAction currentAction = NextAction.idle();
 
 	@Getter
 	private InventorySnapshot snapshot = InventorySnapshot.empty();
@@ -66,7 +66,7 @@ public class Helper
 
 	public void reset()
 	{
-		currentAction = HelperAction.idle();
+		currentAction = NextAction.idle();
 		activeReminders = List.of();
 		rotation.reset();
 		pathRouter.reset();
@@ -111,7 +111,7 @@ public class Helper
 			ownPath);
 		RcPathRouter.ClickTarget click = pathRouter.nextClick(step, destination, path, start, atMine);
 		shortestPathBridge.update(start, shortestPathTarget(end, step), color, obs.getTick());
-		currentAction = new HelperAction(
+		currentAction = new NextAction(
 			step,
 			step.detail(resolvedMode),
 			path,
@@ -122,7 +122,7 @@ public class Helper
 
 	private void clearAction()
 	{
-		currentAction = HelperAction.idle();
+		currentAction = NextAction.idle();
 		pathRouter.reset();
 		shortestPathBridge.clear();
 	}

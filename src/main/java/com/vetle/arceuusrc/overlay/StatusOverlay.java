@@ -1,6 +1,6 @@
 package com.vetle.arceuusrc.overlay;
 
-import com.vetle.arceuusrc.HelperAction;
+import com.vetle.arceuusrc.NextAction;
 import com.vetle.arceuusrc.InventorySnapshot;
 import com.vetle.arceuusrc.RcMode;
 import com.vetle.arceuusrc.Reminder;
@@ -56,7 +56,7 @@ public class StatusOverlay extends OverlayPanel
 			return null;
 		}
 
-		HelperAction action = helper.getCurrentAction();
+		NextAction action = helper.getCurrentAction();
 		boolean inRotation = config.enableHelper()
 			&& action != null
 			&& action.getStep() != RotationStep.IDLE;

@@ -8,7 +8,7 @@ import net.runelite.api.TileObject;
 import net.runelite.api.coords.WorldPoint;
 
 @Value
-public class HelperAction
+public class NextAction
 {
 	RotationStep step;
 	String detail;
@@ -17,8 +17,8 @@ public class HelperAction
 	WorldPoint highlightTile;
 	Color color;
 
-	public static HelperAction idle()
+	public static NextAction idle()
 	{
-		return new HelperAction(RotationStep.IDLE, "Waiting…", Collections.emptyList(), null, null, Color.GRAY);
+		return new NextAction(RotationStep.IDLE, "Waiting…", Collections.emptyList(), null, null, Color.GRAY);
 	}
 }

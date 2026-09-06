@@ -1,7 +1,7 @@
 package com.vetle.arceuusrc.overlay;
 
 import com.vetle.arceuusrc.AgilityShortcut;
-import com.vetle.arceuusrc.HelperAction;
+import com.vetle.arceuusrc.NextAction;
 import com.vetle.arceuusrc.Helper;
 import com.vetle.arceuusrc.ArceuusRcHelperConfig;
 import java.awt.BasicStroke;
@@ -56,7 +56,7 @@ public class NextClickOverlay extends Overlay
 			return null;
 		}
 
-		HelperAction action = helper.getCurrentAction();
+		NextAction action = helper.getCurrentAction();
 		if (action == null)
 		{
 			return null;
