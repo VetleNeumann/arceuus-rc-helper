@@ -15,7 +15,7 @@ public class Rotation
 
 	public RotationStep advance(Observation obs)
 	{
-		RotationStep step = infer(obs.getInventory(), obs.getPosition());
+		RotationStep step = infer(obs.getInventory(), obs.getPosition(), lastStep);
 		if (completesTrip(lastStep, step))
 		{
 			tripsCompleted++;
@@ -35,7 +35,7 @@ public class Rotation
 		tripsCompleted = 0;
 	}
 
-	private static RotationStep infer(InventorySnapshot inv, Position position)
+	private static RotationStep infer(InventorySnapshot inv, Position position, RotationStep lastStep)
 	{
 		boolean hasFrags = inv.getFragments() > 0;
 		boolean hasDark = inv.getDarkBlocks() > 0;
@@ -47,7 +47,7 @@ public class Rotation
 		{
 			if (hasFrags)
 			{
-				return RotationStep.CRAFT_FRAGMENTS;
+				return secondBatch(lastStep) ? RotationStep.CRAFT_REMAINING : RotationStep.CRAFT_FRAGMENTS;
 			}
 			if (hasDark)
 			{
@@ -77,6 +77,12 @@ public class Rotation
 			return RotationStep.GO_DARK_FIRST;
 		}
 		return RotationStep.MINE_FIRST;
+	}
+
+	/** The second Batch follows the chisel at the altar; it stays the second Batch until the player leaves. */
+	private static boolean secondBatch(RotationStep lastStep)
+	{
+		return lastStep == RotationStep.CHISEL_AT_ALTAR || lastStep == RotationStep.CRAFT_REMAINING;
 	}
 
 	private static boolean completesTrip(RotationStep from, RotationStep to)

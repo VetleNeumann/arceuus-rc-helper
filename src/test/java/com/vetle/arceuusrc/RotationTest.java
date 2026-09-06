@@ -104,6 +104,40 @@ public class RotationTest
 	}
 
 	@Test
+	public void chiselAtAltarThenFragmentsCraftsSecondBatch()
+	{
+		step(carrying(0, 8, 60), AT_ALTAR);
+		step(carrying(0, 8, 0), AT_ALTAR);
+		assertEquals(RotationStep.CRAFT_REMAINING, step(carrying(0, 0, 32), AT_ALTAR));
+	}
+
+	@Test
+	public void secondBatchStaysSecondBatchWhileCrafting()
+	{
+		step(carrying(0, 8, 60), AT_ALTAR);
+		step(carrying(0, 8, 0), AT_ALTAR);
+		step(carrying(0, 0, 32), AT_ALTAR);
+		assertEquals(RotationStep.CRAFT_REMAINING, step(carrying(0, 0, 32), AT_ALTAR));
+	}
+
+	@Test
+	public void leavingTheAltarAfterChisellingForgetsTheSecondBatch()
+	{
+		step(carrying(0, 8, 0), AT_ALTAR);
+		step(carrying(0, 0, 32), NEAR_ALTAR);
+		assertEquals(RotationStep.CRAFT_FRAGMENTS, step(carrying(0, 0, 32), AT_ALTAR));
+	}
+
+	@Test
+	public void tripCountsWhenSecondBatchBecomesMiningAgain()
+	{
+		step(carrying(0, 8, 0), AT_ALTAR);
+		step(carrying(0, 0, 32), AT_ALTAR);
+		step(carrying(0, 0, 0), AT_MINE);
+		assertEquals(1, rotation.tripsCompleted());
+	}
+
+	@Test
 	public void atAltarEmptyHandedReturnsToMine()
 	{
 		assertEquals(RotationStep.RETURN_TO_MINE, step(carrying(0, 0, 0), AT_ALTAR));
