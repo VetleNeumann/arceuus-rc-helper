@@ -11,6 +11,10 @@ All notable changes to this plugin. Format: [Keep a Changelog](https://keepachan
 - Trips keep counting while the Helper is switched off; only the Next Action is suppressed.
 - The Status Panel lists every active Reminder as a warning line: gear, lantern, Blood Essence (missing, inactive or low) and Idle. The Essence row itself now shows plain state (charges, active, inactive, none) without colouring it as a warning.
 
+### Fixed
+
+- The second Batch at the crafting altar shows "click the altar again for the second batch" instead of repeating the first-batch instruction. The Step after chiselling at the altar was never inferred, so a Trip only counted when the player walked back with an empty inventory.
+
 ### Removed
 
 - In-game changelog announcement and the migration for the pre-1.0.4 path checkboxes.
