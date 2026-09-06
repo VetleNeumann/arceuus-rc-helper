@@ -1,5 +1,6 @@
 package com.vetle.arceuusrc.overlay;
 
+import com.vetle.arceuusrc.FarBind;
 import com.vetle.arceuusrc.Guidance;
 import com.vetle.arceuusrc.NextAction;
 import com.vetle.arceuusrc.InventorySnapshot;
@@ -83,6 +84,12 @@ public class StatusOverlay extends OverlayPanel
 			panelComponent.getChildren().add(line("Essence", essenceText(inv), essenceColor));
 		}
 
+		FarBind.State farBind = guidance.getFarBind();
+		if (inRotation && farBind != FarBind.State.NONE)
+		{
+			panelComponent.getChildren().add(line("Far Bind", farBind.getLabel(), farBindColor(farBind)));
+		}
+
 		for (Reminder reminder : reminders)
 		{
 			panelComponent.getChildren().add(LineComponent.builder()
@@ -102,6 +109,20 @@ public class StatusOverlay extends OverlayPanel
 			.right(right)
 			.rightColor(rightColor)
 			.build();
+	}
+
+	/** One colour per meaning: neutral when nothing to do, area colour when a step fixes it, warn when nothing does. */
+	private static Color farBindColor(FarBind.State state)
+	{
+		switch (state)
+		{
+			case STEP_IN:
+				return FarBindOverlay.AREA;
+			case NOT_LOADED:
+				return WARN;
+			default:
+				return LABEL;
+		}
 	}
 
 	/** Plain state of the Blood Essence; whether it needs attention is a Reminder, not this row. */

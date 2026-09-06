@@ -23,6 +23,8 @@ public class Observation
 	/** Pose animation is the idle pose, i.e. the player is not walking or running. */
 	boolean idlePose;
 	int tick;
+	/** The Blood Altar's tile lies inside the loaded scene, the first half of Far Bind. */
+	boolean bloodAltarInScene;
 	/** Scene handle for pathfinding; null when no scene is loaded. */
 	WorldView worldView;
 }

@@ -177,6 +177,19 @@ public class RcPathRouterTest
 		return false;
 	}
 
+	@Test
+	public void bloodVenerateLegsApproachTheDarkAltarFromTheSouth()
+	{
+		WorldPoint mine = ArceuusRcArea.MINE_STAND;
+		assertTrue(RcPathRouter.useDarkApproach(RotationStep.GO_DARK_FIRST, mine, RcMode.BLOOD));
+		assertTrue(RcPathRouter.useDarkApproach(RotationStep.GO_DARK_SECOND, mine, RcMode.BLOOD));
+		assertFalse("souls do not Far Bind", RcPathRouter.useDarkApproach(RotationStep.GO_DARK_SECOND, mine, RcMode.SOUL));
+		assertFalse(RcPathRouter.useDarkApproach(RotationStep.GO_ALTAR, mine, RcMode.BLOOD));
+		assertFalse("already at the altar", RcPathRouter.useDarkApproach(RotationStep.GO_DARK_SECOND, ArceuusRcArea.DARK_ALTAR, RcMode.BLOOD));
+		assertFalse("standing on the approach tile", RcPathRouter.useDarkApproach(RotationStep.GO_DARK_SECOND, ArceuusRcArea.DARK_APPROACH, RcMode.BLOOD));
+		assertFalse(RcPathRouter.useDarkApproach(RotationStep.GO_DARK_SECOND, null, RcMode.BLOOD));
+	}
+
 	/** No scene objects tracked: every Shortcut lookup answers null, as when the object is out of scene. */
 	private static class EmptyScene extends SceneTracker
 	{

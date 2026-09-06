@@ -108,6 +108,21 @@ public class SceneTracker
 		}
 	}
 
+	/**
+	 * The Blood Altar's tile lies inside the base scene (not the extended render band, whose
+	 * objects are drawn but never clickable). Half of Far Bind; the other half is reach.
+	 */
+	public boolean isBloodAltarInScene()
+	{
+		WorldView worldView = client == null ? null : client.getTopLevelWorldView();
+		if (worldView == null)
+		{
+			return false;
+		}
+		WorldPoint altar = ArceuusRcArea.BLOOD_ALTAR;
+		return WorldPoint.isInScene(worldView, altar.getX(), altar.getY());
+	}
+
 	public void scanScene()
 	{
 		if (client.getGameState() != GameState.LOGGED_IN)

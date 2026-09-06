@@ -4,6 +4,10 @@ All notable changes to this plugin. Format: [Keep a Changelog](https://keepachan
 
 ## [Unreleased]
 
+### Added
+
+- Far Bind: the Status Panel says whether the Blood Altar can be clicked from where you stand, highlights the Far Bind Area when you are just outside it, and the Path to the Dark Altar passes the tile that keeps the altar loaded. New toggle "Far Bind" under Helper, on by default.
+
 ### Changed
 
 - Forked from JamsRepos/zeah-rc-helper and renamed to Arceuus RC Helper: package `com.vetle.arceuusrc`, config group `arceuus-rc-helper`, the gear reminder key is now `gearReminder`. Settings reset once on upgrade.
