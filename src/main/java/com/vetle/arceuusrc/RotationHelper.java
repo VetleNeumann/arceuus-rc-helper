@@ -8,11 +8,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.Getter;
-import net.runelite.api.Client;
-import net.runelite.api.Player;
-import net.runelite.api.Skill;
 import net.runelite.api.TileObject;
-import net.runelite.api.WorldView;
 import net.runelite.api.coords.WorldPoint;
 
 @Singleton
@@ -20,7 +16,6 @@ public class RotationHelper
 {
 	private static final int FULL_FRAGMENTS = 100;
 
-	private final Client client;
 	private final ArceuusRcHelperConfig config;
 	private final InventoryChecker inventoryChecker;
 	private final ReminderService reminderService;
@@ -44,7 +39,6 @@ public class RotationHelper
 
 	@Inject
 	RotationHelper(
-		Client client,
 		ArceuusRcHelperConfig config,
 		InventoryChecker inventoryChecker,
 		ReminderService reminderService,
@@ -52,7 +46,6 @@ public class RotationHelper
 		RcPathRouter pathRouter,
 		ShortestPathBridge shortestPathBridge)
 	{
-		this.client = client;
 		this.config = config;
 		this.inventoryChecker = inventoryChecker;
 		this.reminderService = reminderService;
@@ -71,20 +64,20 @@ public class RotationHelper
 		inventoryChecker.reset();
 	}
 
-	public void update()
+	public void update(Observation obs)
 	{
-		if (!ArceuusRcArea.isInArceuusRc(playerTile()))
+		if (!obs.isInArceuus())
 		{
 			currentAction = HelperAction.idle();
 			pathRouter.reset();
 			shortestPathBridge.clear();
-			reminderService.update(snapshot, resolvedMode, false);
+			reminderService.update(obs);
 			return;
 		}
 
-		resolvedMode = resolveMode();
-		snapshot = inventoryChecker.scan();
-		reminderService.update(snapshot, resolvedMode, true);
+		resolvedMode = obs.getRune();
+		snapshot = obs.getInventory();
+		reminderService.update(obs);
 
 		if (!config.enableHelper())
 		{
@@ -94,32 +87,31 @@ public class RotationHelper
 			return;
 		}
 
-		RotationStep step = inferStep(snapshot);
+		RotationStep step = inferStep(obs);
 		if (isTripCompleteTransition(lastStep, step))
 		{
 			tripsCompleted++;
 		}
 		lastStep = step;
 
-		WorldPoint start = playerTile();
-		boolean atMine = sceneTracker.isAtMine(start);
-		TileObject destination = destinationObject(step, start);
-		WorldPoint end = pathEnd(destination, step, start);
-		WorldView worldView = client.getTopLevelWorldView();
-		int agility = client.getRealSkillLevel(Skill.AGILITY);
+		Position position = obs.getPosition();
+		WorldPoint start = position.getTile();
+		boolean atMine = position.isAtMine();
+		TileObject destination = destinationObject(step, obs);
+		WorldPoint end = pathEnd(destination, step, atMine);
 		Color color = colorFor(step);
 		boolean ownPath = !config.pathDisplay().isOff() && !shortestPathBridge.isDriving();
 		List<WorldPoint> path = pathRouter.pathTo(
-			worldView,
+			obs.getWorldView(),
 			start,
 			end,
 			step,
-			agility,
+			obs.getAgility(),
 			resolvedMode,
 			atMine,
 			ownPath);
 		RcPathRouter.ClickTarget click = pathRouter.nextClick(step, destination, path, start, atMine);
-		shortestPathBridge.update(shortestPathTarget(end, step), color);
+		shortestPathBridge.update(start, shortestPathTarget(end, step), color, obs.getTick());
 		currentAction = new HelperAction(
 			step,
 			detailFor(step, snapshot),
@@ -159,13 +151,14 @@ public class RotationHelper
 		}
 	}
 
-	private TileObject destinationObject(RotationStep step, WorldPoint tile)
+	private TileObject destinationObject(RotationStep step, Observation obs)
 	{
+		WorldPoint tile = obs.getPosition().getTile();
 		switch (step)
 		{
 			case MINE_FIRST:
 			case MINE_SECOND:
-				return sceneTracker.chooseRunestone(tile, isAnimating());
+				return sceneTracker.chooseRunestone(tile, obs.isAnimating());
 			case GO_DARK_FIRST:
 			case GO_DARK_SECOND:
 				return sceneTracker.getDarkAltar();
@@ -177,23 +170,23 @@ public class RotationHelper
 				return null;
 			case CHISEL_AND_RETURN:
 			case RETURN_TO_MINE:
-				if (sceneTracker.isAtMine(tile) && step == RotationStep.CHISEL_AND_RETURN)
+				if (obs.getPosition().isAtMine() && step == RotationStep.CHISEL_AND_RETURN)
 				{
 					return null;
 				}
-				return sceneTracker.chooseRunestone(tile, isAnimating());
+				return sceneTracker.chooseRunestone(tile, obs.isAnimating());
 			default:
 				return null;
 		}
 	}
 
-	private WorldPoint pathEnd(TileObject destination, RotationStep step, WorldPoint start)
+	private WorldPoint pathEnd(TileObject destination, RotationStep step, boolean atMine)
 	{
 		if (destination != null)
 		{
 			return destination.getWorldLocation();
 		}
-		if (sceneTracker.isAtMine(start) && (step == RotationStep.MINE_FIRST || step == RotationStep.MINE_SECOND
+		if (atMine && (step == RotationStep.MINE_FIRST || step == RotationStep.MINE_SECOND
 			|| step == RotationStep.CHISEL_AND_RETURN || step == RotationStep.RETURN_TO_MINE))
 		{
 			return null;
@@ -236,29 +229,13 @@ public class RotationHelper
 		}
 	}
 
-	private RcMode resolveMode()
+	private RotationStep inferStep(Observation obs)
 	{
-		return RcMode.resolve(config.mode(), client.getRealSkillLevel(Skill.RUNECRAFT));
-	}
-
-	private WorldPoint playerTile()
-	{
-		Player player = client.getLocalPlayer();
-		return player == null ? null : player.getWorldLocation();
-	}
-
-	private boolean isAnimating()
-	{
-		Player player = client.getLocalPlayer();
-		return player != null && player.getAnimation() != -1;
-	}
-
-	private RotationStep inferStep(InventorySnapshot inv)
-	{
-		WorldPoint tile = playerTile();
-		boolean atAltar = sceneTracker.isAtAltar(tile, resolvedMode);
-		boolean nearAltar = sceneTracker.isNearAltar(tile, resolvedMode);
-		boolean atMine = sceneTracker.isAtMine(tile);
+		InventorySnapshot inv = obs.getInventory();
+		Position position = obs.getPosition();
+		boolean atAltar = position.isAtAltar();
+		boolean nearAltar = position.isNearAltar();
+		boolean atMine = position.isAtMine();
 		boolean hasFrags = inv.getFragments() > 0;
 		boolean hasDark = inv.getDarkBlocks() > 0;
 		boolean hasDense = inv.getDenseBlocks() > 0;

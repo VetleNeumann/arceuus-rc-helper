@@ -93,7 +93,7 @@ Two distances from the crafting altar that gate Steps: At Altar means close enou
 ### Guidance
 
 **Helper**:
-The guidance layer: Next Action highlight, Path drawing, and Status Panel. Can be switched off as a unit. Reminders keep running when the Helper is off.
+The guidance layer: Next Action highlight, Path drawing, and Status Panel. Can be switched off as a unit. Reminders keep running when the Helper is off. Also the module that assembles the Next Action from an Observation.
 _Avoid_: plugin (when meaning only this layer), overlay
 
 **Path**:
@@ -110,6 +110,16 @@ Where the Path is drawn: floor, minimap, both, or nowhere.
 **Status Panel**:
 The on-screen panel showing the current Step, item counts, Trips, and active Reminders.
 _Avoid_: overlay panel, HUD
+
+### Reading the game
+
+**Observation**:
+Everything the plugin reads from the game on one tick: whether the player is in Arceuus, the resolved Rune, the Position, the inventory, skill levels, animation state and tick. Built once per tick by the one module that talks to the client; every other module takes it as a value.
+_Avoid_: game state, snapshot (when meaning the whole read), client
+
+**Position**:
+Where the player stands, reduced to what the Rotation needs: the tile plus whether it counts as at the Mine, At Altar or Near Altar for the current Rune.
+_Avoid_: location, player location, coordinates
 
 ### Reminders
 

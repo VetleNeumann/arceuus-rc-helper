@@ -1,5 +1,6 @@
 package com.vetle.arceuusrc;
 
+import com.vetle.arceuusrc.game.ClientObserver;
 import com.vetle.arceuusrc.game.InventoryChecker;
 import com.vetle.arceuusrc.game.SceneTracker;
 import com.vetle.arceuusrc.game.ShortestPathBridge;
@@ -70,6 +71,9 @@ public class ArceuusRcHelperPlugin extends Plugin
 	@Inject
 	private ShortestPathBridge shortestPathBridge;
 
+	@Inject
+	private ClientObserver observer;
+
 	@Override
 	protected void startUp()
 	{
@@ -116,7 +120,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
-		rotationHelper.update();
+		rotationHelper.update(observer.observe());
 	}
 
 	@Subscribe
@@ -173,7 +177,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 		int id = event.getVarbitId();
 		if (id == VarbitID.ARCEUUS_RUNESTONE_1 || id == VarbitID.ARCEUUS_RUNESTONE_2)
 		{
-			rotationHelper.update();
+			rotationHelper.update(observer.observe());
 		}
 	}
 

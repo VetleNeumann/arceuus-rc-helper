@@ -10,8 +10,6 @@ import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
-import net.runelite.api.Player;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.events.PluginMessage;
@@ -43,7 +41,6 @@ public class ShortestPathBridge
 	 */
 	private static final int REFRESH_TICKS = 5;
 
-	private final Client client;
 	private final ArceuusRcHelperConfig config;
 	private final EventBus eventBus;
 	private final PluginManager pluginManager;
@@ -55,12 +52,10 @@ public class ShortestPathBridge
 
 	@Inject
 	public ShortestPathBridge(
-		Client client,
 		ArceuusRcHelperConfig config,
 		EventBus eventBus,
 		PluginManager pluginManager)
 	{
-		this.client = client;
 		this.config = config;
 		this.eventBus = eventBus;
 		this.pluginManager = pluginManager;
@@ -72,24 +67,16 @@ public class ShortestPathBridge
 		return config.pathProvider() == PathProvider.SHORTEST_PATH && isShortestPathRunning();
 	}
 
-	public void update(WorldPoint destination, Color color)
+	/** Posts the route from {@code start} to {@code destination}; {@code tick} paces the refresh. */
+	public void update(WorldPoint start, WorldPoint destination, Color color, int tick)
 	{
 		PathDisplay display = config.pathDisplay();
-		if (!isDriving() || display.isOff() || destination == null)
+		if (!isDriving() || display.isOff() || destination == null || start == null)
 		{
 			clear();
 			return;
 		}
 
-		Player player = client.getLocalPlayer();
-		WorldPoint start = player == null ? null : player.getWorldLocation();
-		if (start == null)
-		{
-			clear();
-			return;
-		}
-
-		int tick = client.getTickCount();
 		boolean sameTarget = destination.equals(postedTarget);
 		boolean unchanged = sameTarget && display == postedDisplay && Objects.equals(color, postedColor);
 		if (unchanged && tick - postedTick < REFRESH_TICKS)
