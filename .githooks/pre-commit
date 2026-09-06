@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# Pre-commit hook: refuse the commit when Spotless finds a formatting violation.
+# It never rewrites files; run ./gradlew spotlessApply yourself and review the diff.
+# Install once with ./gradlew installGitHooks (sets core.hooksPath to .githooks).
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+# Nothing Spotless covers is staged: skip the Gradle start-up.
+if git diff --cached --quiet -- '*.java' '*.gradle' '*.properties' '*.sh' '*.md' '*.xml' '*.yml' '.githooks' '.gitignore' '.editorconfig'; then
+    exit 0
+fi
+
+if ! ./gradlew --quiet spotlessCheck; then
+    echo >&2
+    echo "pre-commit: formatting violations. Run ./gradlew spotlessApply, review the diff, stage it and commit again." >&2
+    echo "pre-commit: Spotless checks the working tree, so partially staged hunks must be clean too." >&2
+    exit 1
+fi

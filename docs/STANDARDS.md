@@ -30,6 +30,7 @@ What `./gradlew build` cannot check. Style is enforced by `config/checkstyle/che
 
 - Trunk-based: branch from `master`, live less than a day, squash-merge back. `master` is protected: CI must be green, history stays linear, no force pushes.
 - CI is the approval. Review happens on the PR when a second person is around; solo, the checklist in the PR template is the review.
+- CI runs the same tools as the git hooks (`./gradlew installGitHooks`, see `docs/DEV-LOOP.md`) plus shellcheck on the scripts and actionlint on the workflows. Nothing passes locally that fails in CI, and vice versa.
 
 ## Dependencies
 

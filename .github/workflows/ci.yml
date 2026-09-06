@@ -27,7 +27,17 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6.3.0
 
-      # Compiles, runs checkstyle (style + forbidden hub APIs) and the unit tests.
+      # Formatting and style first, so a violation fails under its own name before the full build.
+      - name: Check formatting and style
+        run: ./gradlew spotlessCheck checkstyleMain checkstyleTest --no-daemon
+
+      - name: Lint shell scripts
+        run: shellcheck dev.sh .githooks/*
+
+      - name: Lint workflows
+        uses: raven-actions/actionlint@3d39aea434753780c3b3d4a1a31c854b4dbf49d7 # v2.2.0
+
+      # Compiles with Error Prone, runs checkstyle (style + forbidden hub APIs) and the unit tests.
       - run: ./gradlew build --no-daemon
 
       - name: Upload reports on failure

@@ -70,7 +70,7 @@ spotless {
 		endWithNewline()
 	}
 	format 'misc', {
-		target '*.gradle', '*.properties', '*.sh', '.gitignore', '.editorconfig', '.github/**/*.yml', 'config/**/*.xml', 'config/**/*.properties'
+		target '*.gradle', '*.properties', '*.sh', '.gitignore', '.editorconfig', '.githooks/*', '.github/**/*.yml', 'config/**/*.xml', 'config/**/*.properties'
 		trimTrailingWhitespace()
 		endWithNewline()
 	}
@@ -91,6 +91,12 @@ tasks.withType(JavaCompile).configureEach {
 		// RuneLite value types that are immutable but not annotated as such (Lombok @Value upstream).
 		option('Immutable:KnownImmutable', 'net.runelite.api.coords.WorldPoint')
 	}
+}
+
+tasks.register('installGitHooks', Exec) {
+	group = 'verification'
+	description = 'Point git at .githooks so pre-commit (Spotless) and pre-push (full build) run locally.'
+	commandLine 'git', 'config', 'core.hooksPath', '.githooks'
 }
 
 tasks.register('run', JavaExec) {

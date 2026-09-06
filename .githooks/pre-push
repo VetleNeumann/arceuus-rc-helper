@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Pre-push hook: run the full build (Error Prone, Spotless, checkstyle, tests) before anything leaves the machine.
+# Install once with ./gradlew installGitHooks (sets core.hooksPath to .githooks).
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+
+if ! ./gradlew --quiet build; then
+    echo >&2
+    echo "pre-push: ./gradlew build failed. Fix it, or push with --no-verify only if CI is meant to see the failure." >&2
+    exit 1
+fi
