@@ -10,13 +10,8 @@ import net.runelite.client.config.Range;
 public interface ArceuusRcHelperConfig extends Config
 {
 	String GROUP = "arceuus-rc-helper";
-	String SEEN_CHANGELOG_VERSION_KEY = "seenChangelogVersion";
 	String PATH_DISPLAY_KEY = "pathDisplay";
 	String PATH_PROVIDER_KEY = "pathProvider";
-	/** Replaced by {@link #PATH_DISPLAY_KEY}; still read once by {@link PathDisplayMigration}. */
-	String LEGACY_SHOW_PATH_KEY = "showPath";
-	/** Replaced by {@link #PATH_DISPLAY_KEY}; still read once by {@link PathDisplayMigration}. */
-	String LEGACY_SHOW_MINIMAP_PATH_KEY = "showMinimapPath";
 
 	@ConfigSection(
 		name = "Helper",
@@ -176,16 +171,5 @@ public interface ArceuusRcHelperConfig extends Config
 	default boolean idleFlash()
 	{
 		return false;
-	}
-
-	@ConfigItem(
-		keyName = SEEN_CHANGELOG_VERSION_KEY,
-		name = "Seen changelog version",
-		description = "Last Arceuus RC Helper version whose update notes were shown in chat.",
-		hidden = true
-	)
-	default String seenChangelogVersion()
-	{
-		return "";
 	}
 }

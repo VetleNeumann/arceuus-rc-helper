@@ -21,7 +21,6 @@ import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WallObjectDespawned;
 import net.runelite.api.events.WallObjectSpawned;
 import net.runelite.api.gameval.VarbitID;
-import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -66,21 +65,11 @@ public class ArceuusRcHelperPlugin extends Plugin
 	private SceneTracker sceneTracker;
 
 	@Inject
-	private ChangelogService changelogService;
-
-	@Inject
-	private PathDisplayMigration pathDisplayMigration;
-
-	@Inject
 	private ShortestPathBridge shortestPathBridge;
-
-	@Inject
-	private ClientThread clientThread;
 
 	@Override
 	protected void startUp()
 	{
-		pathDisplayMigration.run();
 		rotationHelper.reset();
 		reminderService.reset();
 		inventoryChecker.reset();
@@ -90,7 +79,6 @@ public class ArceuusRcHelperPlugin extends Plugin
 		overlayManager.add(pathMinimapOverlay);
 		overlayManager.add(statusOverlay);
 		overlayManager.add(idleTintOverlay);
-		clientThread.invoke(changelogService::maybeAnnounce);
 		log.debug("Arceuus RC Helper started");
 	}
 
@@ -104,7 +92,6 @@ public class ArceuusRcHelperPlugin extends Plugin
 		rotationHelper.reset();
 		reminderService.reset();
 		sceneTracker.reset();
-		changelogService.reset();
 		shortestPathBridge.clear();
 	}
 
@@ -197,7 +184,6 @@ public class ArceuusRcHelperPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged event)
 	{
-		changelogService.onGameStateChanged(event);
 		if (event.getGameState() == GameState.LOADING)
 		{
 			sceneTracker.reset();

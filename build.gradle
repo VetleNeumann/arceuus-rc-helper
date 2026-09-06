@@ -28,7 +28,7 @@ dependencies {
 }
 
 group = 'com.vetle.arceuusrc'
-version = '1.0.4' // Keep Changelog.VERSION
+version = '1.0.4'
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'
