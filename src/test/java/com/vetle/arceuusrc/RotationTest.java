@@ -68,9 +68,17 @@ public class RotationTest
 	}
 
 	@Test
-	public void fragmentsPlusDarkBlocksWithFullInventoryGoToAltar()
+	public void firstChiselOfAFullLoadKeepsChiselling()
 	{
-		assertEquals(RotationStep.GO_ALTAR, step(carrying(0, SLOTS - 1, 40), ON_THE_WAY));
+		// 27 Dark then 26 Dark plus a stack of 4: the inventory stays full, the stack is far from Full.
+		step(carrying(0, SLOTS, 0), ON_THE_WAY);
+		assertEquals(RotationStep.CHISEL_AND_RETURN, step(carrying(0, SLOTS - 1, 4), ON_THE_WAY));
+	}
+
+	@Test
+	public void secondLoadWithFullStackGoesToAltar()
+	{
+		assertEquals(RotationStep.GO_ALTAR, step(carrying(0, SLOTS - 1, 104), ON_THE_WAY));
 	}
 
 	@Test

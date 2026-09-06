@@ -53,7 +53,7 @@ public class Rotation
 			return RotationStep.RETURN_TO_MINE;
 		}
 
-		if (hasFrags && hasDark && (inventoryFull || fullStack || position.isNearAltar()))
+		if (hasFrags && hasDark && (fullStack || position.isNearAltar()))
 		{
 			return RotationStep.GO_ALTAR;
 		}
