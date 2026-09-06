@@ -27,6 +27,14 @@ public interface ArceuusRcHelperConfig extends Config
 	)
 	String reminderSection = "reminders";
 
+	@ConfigSection(
+		name = "Prototype",
+		description = "THROWAWAY: Camera Check look prototype (wayfinder #22)",
+		position = 9,
+		closedByDefault = false
+	)
+	String prototypeSection = "prototype";
+
 	@ConfigItem(
 		keyName = "mode",
 		name = "Rune type",
@@ -196,6 +204,48 @@ public interface ArceuusRcHelperConfig extends Config
 		position = 5
 	)
 	default boolean idleFlash()
+	{
+		return false;
+	}
+
+	@ConfigItem(keyName = "protoCameraCheck", name = "Camera Check prototype", description = "Judge every Blood Hop from its Landing Tile", section = prototypeSection, position = 0)
+	default boolean protoCameraCheck()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "protoGhostStyle", name = "Ghost style", description = "How the predicted target shapes are drawn", section = prototypeSection, position = 1)
+	default com.vetle.arceuusrc.overlay.CameraCheckPrototype.GhostStyle protoGhostStyle()
+	{
+		return com.vetle.arceuusrc.overlay.CameraCheckPrototype.GhostStyle.OUTLINE;
+	}
+
+	@ConfigItem(keyName = "protoPanelStyle", name = "Panel style", description = "Rows in the Status Panel, a separate panel, or summary only", section = prototypeSection, position = 2)
+	default com.vetle.arceuusrc.overlay.CameraCheckPrototype.PanelStyle protoPanelStyle()
+	{
+		return com.vetle.arceuusrc.overlay.CameraCheckPrototype.PanelStyle.STATUS_ROWS;
+	}
+
+	@ConfigItem(keyName = "protoCauseWords", name = "Cause words", description = "Long or short cause vocabulary", section = prototypeSection, position = 3)
+	default com.vetle.arceuusrc.overlay.CameraCheckPrototype.CauseWords protoCauseWords()
+	{
+		return com.vetle.arceuusrc.overlay.CameraCheckPrototype.CauseWords.SHORT;
+	}
+
+	@ConfigItem(keyName = "protoSummaryStyle", name = "Summary style", description = "WORST reports Obstructed too; HIDDEN_ONLY says OK unless something is Hidden", section = prototypeSection, position = 4)
+	default com.vetle.arceuusrc.overlay.CameraCheckPrototype.SummaryStyle protoSummaryStyle()
+	{
+		return com.vetle.arceuusrc.overlay.CameraCheckPrototype.SummaryStyle.WORST;
+	}
+
+	@ConfigItem(keyName = "protoUnknownStyle", name = "Unknown style", description = "How a Hop with unknown geometry shows", section = prototypeSection, position = 5)
+	default com.vetle.arceuusrc.overlay.CameraCheckPrototype.UnknownStyle protoUnknownStyle()
+	{
+		return com.vetle.arceuusrc.overlay.CameraCheckPrototype.UnknownStyle.QUESTION;
+	}
+
+	@ConfigItem(keyName = "protoSimulateUnknown", name = "Simulate unknown geometry", description = "Treat the Scramble Hops as unknown to see how the panel handles it", section = prototypeSection, position = 6)
+	default boolean protoSimulateUnknown()
 	{
 		return false;
 	}

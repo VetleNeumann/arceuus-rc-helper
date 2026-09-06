@@ -4,6 +4,8 @@ import com.vetle.arceuusrc.game.ClientObserver;
 import com.vetle.arceuusrc.game.SceneTracker;
 import com.vetle.arceuusrc.game.ShortestPathBridge;
 import com.google.inject.Provides;
+import com.vetle.arceuusrc.overlay.CameraCheckGhostPrototypeOverlay;
+import com.vetle.arceuusrc.overlay.CameraCheckPanelPrototypeOverlay;
 import com.vetle.arceuusrc.overlay.FarBindOverlay;
 import com.vetle.arceuusrc.overlay.FragmentEstimateOverlay;
 import com.vetle.arceuusrc.overlay.IdleTintOverlay;
@@ -64,6 +66,12 @@ public class ArceuusRcHelperPlugin extends Plugin
 	private FragmentEstimateOverlay fragmentEstimateOverlay;
 
 	@Inject
+	private CameraCheckGhostPrototypeOverlay cameraCheckGhostPrototypeOverlay;
+
+	@Inject
+	private CameraCheckPanelPrototypeOverlay cameraCheckPanelPrototypeOverlay;
+
+	@Inject
 	private Helper helper;
 
 	@Inject
@@ -95,6 +103,8 @@ public class ArceuusRcHelperPlugin extends Plugin
 		overlayManager.add(idleTintOverlay);
 		overlayManager.add(farBindOverlay);
 		overlayManager.add(fragmentEstimateOverlay);
+		overlayManager.add(cameraCheckGhostPrototypeOverlay);
+		overlayManager.add(cameraCheckPanelPrototypeOverlay);
 		log.debug("Arceuus RC Helper started");
 	}
 
@@ -107,6 +117,8 @@ public class ArceuusRcHelperPlugin extends Plugin
 		overlayManager.remove(idleTintOverlay);
 		overlayManager.remove(farBindOverlay);
 		overlayManager.remove(fragmentEstimateOverlay);
+		overlayManager.remove(cameraCheckGhostPrototypeOverlay);
+		overlayManager.remove(cameraCheckPanelPrototypeOverlay);
 		helper.reset();
 		reminders.reset();
 		sceneTracker.reset();

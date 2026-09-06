@@ -8,7 +8,9 @@ import com.vetle.arceuusrc.RcMode;
 import com.vetle.arceuusrc.Reminder;
 import com.vetle.arceuusrc.Helper;
 import com.vetle.arceuusrc.RotationStep;
+import com.vetle.arceuusrc.ArceuusRcHelperConfig;
 import com.vetle.arceuusrc.ArceuusRcHelperPlugin;
+import com.vetle.arceuusrc.overlay.CameraCheckPrototype.PanelStyle;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -31,15 +33,21 @@ public class StatusOverlay extends OverlayPanel
 	private static final Dimension SIZE = new Dimension(156, 0);
 
 	private final Helper helper;
+	private final CameraCheckPrototype prototype;
+	private final ArceuusRcHelperConfig config;
 
 	@Inject
 	private StatusOverlay(
 		ArceuusRcHelperPlugin plugin,
-		Helper helper)
+		Helper helper,
+		CameraCheckPrototype prototype,
+		ArceuusRcHelperConfig config)
 	{
 		super(plugin);
 		setPosition(OverlayPosition.TOP_LEFT);
 		this.helper = helper;
+		this.prototype = prototype;
+		this.config = config;
 		panelComponent.setBorder(new Rectangle(8, 8, 8, 8));
 		panelComponent.setGap(new Point(0, 4));
 		panelComponent.setPreferredSize(SIZE);
@@ -87,6 +95,16 @@ public class StatusOverlay extends OverlayPanel
 		if (inRotation && farBind != FarBind.State.NONE)
 		{
 			panelComponent.getChildren().add(line("Far Bind", farBind.getLabel(), farBindColor(farBind)));
+		}
+
+		// PROTOTYPE (wayfinder #22): Camera Check summary row, plus per-Hop rows in the STATUS_ROWS variant.
+		if (prototype.enabled() && config.protoPanelStyle() != PanelStyle.SEPARATE)
+		{
+			CameraCheckRows.addSummary(panelComponent, prototype, config);
+			if (config.protoPanelStyle() == PanelStyle.STATUS_ROWS)
+			{
+				CameraCheckRows.addRows(panelComponent, prototype, config);
+			}
 		}
 
 		for (Reminder reminder : reminders)
