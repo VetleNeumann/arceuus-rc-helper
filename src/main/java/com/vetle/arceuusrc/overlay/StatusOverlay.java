@@ -1,12 +1,12 @@
 package com.vetle.arceuusrc.overlay;
 
+import com.vetle.arceuusrc.Guidance;
 import com.vetle.arceuusrc.NextAction;
 import com.vetle.arceuusrc.InventorySnapshot;
 import com.vetle.arceuusrc.RcMode;
 import com.vetle.arceuusrc.Reminder;
 import com.vetle.arceuusrc.Helper;
 import com.vetle.arceuusrc.RotationStep;
-import com.vetle.arceuusrc.ArceuusRcHelperConfig;
 import com.vetle.arceuusrc.ArceuusRcHelperPlugin;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -29,18 +29,15 @@ public class StatusOverlay extends OverlayPanel
 	private static final Color ESSENCE_OK = new Color(120, 200, 140);
 	private static final Dimension SIZE = new Dimension(156, 0);
 
-	private final ArceuusRcHelperConfig config;
 	private final Helper helper;
 
 	@Inject
 	private StatusOverlay(
 		ArceuusRcHelperPlugin plugin,
-		ArceuusRcHelperConfig config,
 		Helper helper)
 	{
 		super(plugin);
 		setPosition(OverlayPosition.TOP_LEFT);
-		this.config = config;
 		this.helper = helper;
 		panelComponent.setBorder(new Rectangle(8, 8, 8, 8));
 		panelComponent.setGap(new Point(0, 4));
@@ -51,20 +48,15 @@ public class StatusOverlay extends OverlayPanel
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (!config.showStatusPanel())
+		Guidance guidance = helper.getGuidance();
+		if (!guidance.isShowPanel())
 		{
 			return null;
 		}
 
-		NextAction action = helper.getCurrentAction();
-		boolean inRotation = config.enableHelper()
-			&& action != null
-			&& action.getStep() != RotationStep.IDLE;
-		List<Reminder> reminders = helper.getActiveReminders();
-		if (!inRotation && reminders.isEmpty())
-		{
-			return null;
-		}
+		NextAction action = guidance.getNextAction();
+		boolean inRotation = action.getStep() != RotationStep.IDLE;
+		List<Reminder> reminders = guidance.getReminders();
 
 		RcMode mode = helper.getResolvedMode();
 		InventorySnapshot inv = helper.getSnapshot();

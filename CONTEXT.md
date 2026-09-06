@@ -96,6 +96,10 @@ Two distances from the crafting altar that gate Steps: At Altar means close enou
 The guidance layer: Next Action highlight, Path drawing, and Status Panel. Can be switched off as a unit. Reminders keep running and Trips keep counting when the Helper is off. Also the module that assembles the Next Action from an Observation.
 _Avoid_: plugin (when meaning only this layer), overlay
 
+**Guidance**:
+What the Helper decided to show on one tick: the Next Action, the active Reminders, and which of the highlight, the Path Display on floor and minimap, the Status Panel and the Idle Tint are drawn. Overlays draw the Guidance and decide nothing themselves.
+_Avoid_: display state, overlay state
+
 **Path**:
 The ordered tiles from the player to the Next Action target, possibly through a Shortcut.
 _Avoid_: route, line, walk

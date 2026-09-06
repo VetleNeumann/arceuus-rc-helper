@@ -1,8 +1,6 @@
 package com.vetle.arceuusrc.overlay;
 
-import com.vetle.arceuusrc.ArceuusRcHelperConfig;
 import com.vetle.arceuusrc.Helper;
-import com.vetle.arceuusrc.Reminder;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -17,23 +15,21 @@ public class IdleTintOverlay extends Overlay
 	private static final Color TINT = new Color(255, 70, 70, 35);
 
 	private final Client client;
-	private final ArceuusRcHelperConfig config;
 	private final Helper helper;
 
 	@Inject
-	private IdleTintOverlay(Client client, ArceuusRcHelperConfig config, Helper helper)
+	private IdleTintOverlay(Client client, Helper helper)
 	{
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ALWAYS_ON_TOP);
 		this.client = client;
-		this.config = config;
 		this.helper = helper;
 	}
 
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (!config.idleFlash() || !isIdle())
+		if (!helper.getGuidance().isIdleTint())
 		{
 			return null;
 		}
@@ -41,17 +37,5 @@ public class IdleTintOverlay extends Overlay
 		graphics.setColor(TINT);
 		graphics.fillRect(0, 0, client.getCanvasWidth(), client.getCanvasHeight());
 		return null;
-	}
-
-	private boolean isIdle()
-	{
-		for (Reminder reminder : helper.getActiveReminders())
-		{
-			if (reminder.getKind() == Reminder.Kind.IDLE)
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 }

@@ -1,9 +1,9 @@
 package com.vetle.arceuusrc.overlay;
 
 import com.vetle.arceuusrc.AgilityShortcut;
+import com.vetle.arceuusrc.Guidance;
 import com.vetle.arceuusrc.NextAction;
 import com.vetle.arceuusrc.Helper;
-import com.vetle.arceuusrc.ArceuusRcHelperConfig;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -35,39 +35,28 @@ public class NextClickOverlay extends Overlay
 	private static final Stroke PATH_LINE = new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 
 	private final Client client;
-	private final ArceuusRcHelperConfig config;
 	private final Helper helper;
 
 	@Inject
-	private NextClickOverlay(Client client, ArceuusRcHelperConfig config, Helper helper)
+	private NextClickOverlay(Client client, Helper helper)
 	{
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_SCENE);
 		this.client = client;
-		this.config = config;
 		this.helper = helper;
 	}
 
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (!config.enableHelper())
-		{
-			return null;
-		}
-
-		NextAction action = helper.getCurrentAction();
-		if (action == null)
-		{
-			return null;
-		}
-
+		Guidance guidance = helper.getGuidance();
+		NextAction action = guidance.getNextAction();
 		Color base = action.getColor() != null ? action.getColor() : Color.CYAN;
-		if (config.pathDisplay().showsFloor())
+		if (guidance.isDrawFloorPath())
 		{
 			renderPath(graphics, action.getPath(), base);
 		}
-		if (config.highlightNextClick())
+		if (guidance.isHighlightClick())
 		{
 			if (action.getHighlightObject() != null)
 			{

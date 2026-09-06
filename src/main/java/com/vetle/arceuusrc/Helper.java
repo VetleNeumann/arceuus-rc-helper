@@ -26,7 +26,10 @@ public class Helper
 	private final ShortestPathBridge shortestPathBridge;
 	private final Rotation rotation = new Rotation();
 
+	/** What the overlays draw this tick. */
 	@Getter
+	private Guidance guidance = Guidance.none();
+
 	private NextAction currentAction = NextAction.idle();
 
 	@Getter
@@ -35,8 +38,6 @@ public class Helper
 	@Getter
 	private RcMode resolvedMode = RcMode.BLOOD;
 
-	/** Reminders that applied on the last tick, in display order. */
-	@Getter
 	private List<Reminder> activeReminders = List.of();
 
 	@Inject
@@ -66,6 +67,7 @@ public class Helper
 
 	public void reset()
 	{
+		guidance = Guidance.none();
 		currentAction = NextAction.idle();
 		activeReminders = List.of();
 		rotation.reset();
@@ -75,23 +77,30 @@ public class Helper
 
 	public void update(Observation obs)
 	{
-		if (!obs.isInArceuus())
-		{
-			clearAction();
-			activeReminders = reminders.evaluate(obs, Instant.now());
-			return;
-		}
-
-		resolvedMode = obs.getRune();
-		snapshot = obs.getInventory();
 		activeReminders = reminders.evaluate(obs, Instant.now());
-		RotationStep step = rotation.advance(obs);
-
-		if (!config.enableHelper())
+		if (obs.isInArceuus())
+		{
+			resolvedMode = obs.getRune();
+			snapshot = obs.getInventory();
+			RotationStep step = rotation.advance(obs);
+			if (config.enableHelper())
+			{
+				currentAction = nextAction(obs, step);
+			}
+			else
+			{
+				clearAction();
+			}
+		}
+		else
 		{
 			clearAction();
-			return;
 		}
+		guidance = Guidance.decide(config, currentAction, activeReminders);
+	}
+
+	private NextAction nextAction(Observation obs, RotationStep step)
+	{
 
 		Position position = obs.getPosition();
 		WorldPoint start = position.getTile();
@@ -111,7 +120,7 @@ public class Helper
 			ownPath);
 		RcPathRouter.ClickTarget click = pathRouter.nextClick(step, destination, path, start, atMine);
 		shortestPathBridge.update(start, shortestPathTarget(end, step), color, obs.getTick());
-		currentAction = new NextAction(
+		return new NextAction(
 			step,
 			step.detail(resolvedMode),
 			path,
