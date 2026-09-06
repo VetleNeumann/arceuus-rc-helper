@@ -1,7 +1,6 @@
 package com.vetle.arceuusrc;
 
 import com.vetle.arceuusrc.game.ClientObserver;
-import com.vetle.arceuusrc.game.InventoryChecker;
 import com.vetle.arceuusrc.game.SceneTracker;
 import com.vetle.arceuusrc.game.ShortestPathBridge;
 import com.google.inject.Provides;
@@ -63,7 +62,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 	private Reminders reminders;
 
 	@Inject
-	private InventoryChecker inventoryChecker;
+	private FragmentTracker fragmentTracker;
 
 	@Inject
 	private SceneTracker sceneTracker;
@@ -79,7 +78,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 	{
 		helper.reset();
 		reminders.reset();
-		inventoryChecker.reset();
+		fragmentTracker.reset();
 		sceneTracker.reset();
 		sceneTracker.scanScene();
 		overlayManager.add(nextClickOverlay);
@@ -185,7 +184,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 	public void onChatMessage(ChatMessage event)
 	{
 		reminders.onChatMessage(event);
-		inventoryChecker.onChatMessage(event);
+		fragmentTracker.onChatMessage(event);
 	}
 
 	@Subscribe
@@ -203,7 +202,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 		{
 			helper.reset();
 			reminders.reset();
-			inventoryChecker.reset();
+			fragmentTracker.reset();
 			sceneTracker.reset();
 			shortestPathBridge.clear();
 		}

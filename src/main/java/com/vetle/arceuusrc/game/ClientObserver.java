@@ -2,6 +2,7 @@ package com.vetle.arceuusrc.game;
 
 import com.vetle.arceuusrc.ArceuusRcArea;
 import com.vetle.arceuusrc.ArceuusRcHelperConfig;
+import com.vetle.arceuusrc.FragmentTracker;
 import com.vetle.arceuusrc.InventorySnapshot;
 import com.vetle.arceuusrc.Observation;
 import com.vetle.arceuusrc.Position;
@@ -23,19 +24,22 @@ public class ClientObserver
 	private final Client client;
 	private final ArceuusRcHelperConfig config;
 	private final SceneTracker sceneTracker;
-	private final InventoryChecker inventoryChecker;
+	private final InventoryReader inventoryReader;
+	private final FragmentTracker fragmentTracker;
 
 	@Inject
 	public ClientObserver(
 		Client client,
 		ArceuusRcHelperConfig config,
 		SceneTracker sceneTracker,
-		InventoryChecker inventoryChecker)
+		InventoryReader inventoryReader,
+		FragmentTracker fragmentTracker)
 	{
 		this.client = client;
 		this.config = config;
 		this.sceneTracker = sceneTracker;
-		this.inventoryChecker = inventoryChecker;
+		this.inventoryReader = inventoryReader;
+		this.fragmentTracker = fragmentTracker;
 	}
 
 	public Observation observe()
@@ -51,7 +55,7 @@ public class ClientObserver
 				sceneTracker.isAtAltar(tile, rune),
 				sceneTracker.isNearAltar(tile, rune))
 			: Position.UNKNOWN;
-		InventorySnapshot inventory = inArceuus ? inventoryChecker.scan() : InventorySnapshot.empty();
+		InventorySnapshot inventory = inArceuus ? fragmentTracker.observe(inventoryReader.read()) : InventorySnapshot.empty();
 		boolean animating = player != null && player.getAnimation() != -1;
 		boolean idlePose = player == null || player.getPoseAnimation() == player.getIdlePoseAnimation();
 		return new Observation(

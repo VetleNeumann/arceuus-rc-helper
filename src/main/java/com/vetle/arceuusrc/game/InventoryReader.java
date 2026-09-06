@@ -1,9 +1,7 @@
 package com.vetle.arceuusrc.game;
 
-import com.vetle.arceuusrc.InventorySnapshot;
+import com.vetle.arceuusrc.RawInventory;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.Client;
@@ -11,67 +9,29 @@ import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.api.Item;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.ItemContainer;
-import net.runelite.api.events.ChatMessage;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.ItemID;
 import net.runelite.api.widgets.Widget;
-import net.runelite.client.util.Text;
 
+/**
+ * Reads the inventory and worn gear from the Client into a {@link RawInventory}. Stateless: the
+ * Fragment count the game hides is resolved by {@code FragmentTracker} in the root package.
+ */
 @Singleton
-public class InventoryChecker
+public class InventoryReader
 {
 	private static final int INVENTORY_SIZE = 28;
-	private static final int FRAGMENTS_PER_BLOCK = 4;
-	private static final int MAX_FRAGMENTS = 111;
-	private static final int TYPICAL_FULL_STACK = 108;
-	private static final Pattern COUNT_MANY = Pattern.compile(
-		"this stack of fragments is roughly equivalent to (\\d+) pieces? of essence",
-		Pattern.CASE_INSENSITIVE);
-	private static final Pattern COUNT_ONE = Pattern.compile(
-		"this stack of fragments is roughly equivalent to one piece of essence",
-		Pattern.CASE_INSENSITIVE);
 
 	private final Client client;
 
-	private int trackedFragments;
-	private int lastDarkBlocks = -1;
-
 	@Inject
-	public InventoryChecker(Client client)
+	public InventoryReader(Client client)
 	{
 		this.client = client;
 	}
 
-	public void reset()
-	{
-		trackedFragments = 0;
-		lastDarkBlocks = -1;
-	}
-
-	public void onChatMessage(ChatMessage event)
-	{
-		String message = Text.removeTags(event.getMessage());
-		if (COUNT_ONE.matcher(message).find())
-		{
-			trackedFragments = 1;
-			return;
-		}
-		Matcher many = COUNT_MANY.matcher(message);
-		if (many.find())
-		{
-			try
-			{
-				trackedFragments = Math.min(MAX_FRAGMENTS, Integer.parseInt(many.group(1)));
-			}
-			catch (NumberFormatException ignored)
-			{
-				// Keep the previous estimate.
-			}
-		}
-	}
-
-	public InventorySnapshot scan()
+	public RawInventory read()
 	{
 		int dense = 0;
 		int dark = 0;
@@ -142,7 +102,6 @@ public class InventoryChecker
 		}
 
 		int widgetQty = fragmentQuantityFromWidget();
-		int fragments = resolveFragmentCount(hasFragmentItem, fragmentQty, widgetQty, dark, empty);
 
 		ItemContainer equipment = client.getItemContainer(InventoryID.WORN);
 		if (equipment != null)
@@ -161,10 +120,12 @@ public class InventoryChecker
 
 		boolean lanternEquipped = lanternId != -1 && equipmentHasLantern(equipment);
 
-		return new InventorySnapshot(
+		return new RawInventory(
 			dense,
 			dark,
-			fragments,
+			hasFragmentItem,
+			fragmentQty,
+			widgetQty,
 			empty,
 			chisel,
 			pickaxe,
@@ -173,38 +134,6 @@ public class InventoryChecker
 			lanternEquipped,
 			lanternInv,
 			lanternId);
-	}
-
-	private int resolveFragmentCount(boolean hasFragmentItem, int containerQty, int widgetQty, int dark, int empty)
-	{
-		if (!hasFragmentItem)
-		{
-			trackedFragments = 0;
-			lastDarkBlocks = dark;
-			return 0;
-		}
-
-		int visible = Math.max(containerQty, widgetQty);
-		if (visible > 1)
-		{
-			trackedFragments = Math.min(MAX_FRAGMENTS, visible);
-		}
-		else if (lastDarkBlocks >= 0 && dark < lastDarkBlocks)
-		{
-			trackedFragments = Math.min(MAX_FRAGMENTS, trackedFragments + FRAGMENTS_PER_BLOCK * (lastDarkBlocks - dark));
-		}
-		else if (trackedFragments <= 1 && empty == 0 && dark > 0)
-		{
-			// Second inventory: fragment stack + full bag of dark. Quantity is hidden as 1.
-			trackedFragments = TYPICAL_FULL_STACK;
-		}
-		else if (trackedFragments <= 0)
-		{
-			trackedFragments = Math.max(1, visible);
-		}
-
-		lastDarkBlocks = dark;
-		return trackedFragments;
 	}
 
 	private int fragmentQuantityFromWidget()
