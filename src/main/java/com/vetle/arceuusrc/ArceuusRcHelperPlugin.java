@@ -57,7 +57,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 	private IdleTintOverlay idleTintOverlay;
 
 	@Inject
-	private RotationHelper rotationHelper;
+	private Helper helper;
 
 	@Inject
 	private ReminderService reminderService;
@@ -77,7 +77,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
-		rotationHelper.reset();
+		helper.reset();
 		reminderService.reset();
 		inventoryChecker.reset();
 		sceneTracker.reset();
@@ -96,7 +96,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 		overlayManager.remove(pathMinimapOverlay);
 		overlayManager.remove(statusOverlay);
 		overlayManager.remove(idleTintOverlay);
-		rotationHelper.reset();
+		helper.reset();
 		reminderService.reset();
 		sceneTracker.reset();
 		shortestPathBridge.clear();
@@ -120,7 +120,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
-		rotationHelper.update(observer.observe());
+		helper.update(observer.observe());
 	}
 
 	@Subscribe
@@ -177,7 +177,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 		int id = event.getVarbitId();
 		if (id == VarbitID.ARCEUUS_RUNESTONE_1 || id == VarbitID.ARCEUUS_RUNESTONE_2)
 		{
-			rotationHelper.update(observer.observe());
+			helper.update(observer.observe());
 		}
 	}
 
@@ -201,7 +201,7 @@ public class ArceuusRcHelperPlugin extends Plugin
 		}
 		else if (event.getGameState() == GameState.LOGIN_SCREEN)
 		{
-			rotationHelper.reset();
+			helper.reset();
 			reminderService.reset();
 			inventoryChecker.reset();
 			sceneTracker.reset();

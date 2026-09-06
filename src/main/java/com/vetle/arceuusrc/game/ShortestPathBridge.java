@@ -133,7 +133,7 @@ public class ShortestPathBridge
 		overrides.put("drawTransports", false);
 		overrides.put("showTransportInfo", false);
 		// Dense runestones / altar objects sit on blocked tiles; allow a short miss without the
-		// purple unreachable flash. Prefer walkable stand tiles from RotationHelper when possible.
+		// purple unreachable flash. Prefer walkable stand tiles from the Helper when possible.
 		overrides.put("unreachableTargetDistanceThreshold", 8);
 		overrides.put("useAgilityShortcuts", true);
 		overrides.put("useTeleportationItems", "None");

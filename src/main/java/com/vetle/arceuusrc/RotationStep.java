@@ -32,6 +32,37 @@ public enum RotationStep
 		this.color = color;
 	}
 
+	/** The one-line instruction for this Step, worded for the Rune being crafted. */
+	public String detail(RcMode rune)
+	{
+		String altar = rune == RcMode.SOUL ? "soul" : "blood";
+		switch (this)
+		{
+			case MINE_FIRST:
+				return "Fill your first inventory";
+			case GO_DARK_FIRST:
+				return "Click the Dark Altar to venerate all dense blocks";
+			case CHISEL_AND_RETURN:
+				return "Use chisel on dark blocks while running back to the mine";
+			case MINE_SECOND:
+				return "Fill your second inventory";
+			case GO_DARK_SECOND:
+				return "Venerate the second inventory at the Dark Altar";
+			case GO_ALTAR:
+				return "Carry fragments + dark blocks to the " + altar + " altar";
+			case CRAFT_FRAGMENTS:
+				return "Click the " + altar + " altar to craft your fragments";
+			case CHISEL_AT_ALTAR:
+				return "Chisel the remaining dark blocks into fragments";
+			case CRAFT_REMAINING:
+				return "Click the " + altar + " altar again for the second batch";
+			case RETURN_TO_MINE:
+				return "Take the shortcut back to the dense essence mine";
+			default:
+				return label;
+		}
+	}
+
 	public List<WorldPoint> highlightTiles(RcMode resolvedMode)
 	{
 		switch (this)
